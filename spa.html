@@ -156,6 +156,52 @@
         }
         prison.who()
     })(jQuery)
+
+    // 클로저 동작 방식 이해 - 실행 컨텍스트 delete Fail
+    // ;(function closureHowtoByExecutionContext2() {
+    //     var logStayInAlive
+    //     let curryLog, logHello, logGoodbye
+    //     curryLog= function (arg_text) {
+    //         const log_it= function () {
+    //             console.log(arg_text)
+    //         }
+    //         return log_it
+    //     }
+    //     logHello= curryLog('hello')
+    //     logStayInAlive= curryLog('stayin alive!')
+    //     logGoodbye= curryLog('goodby')
+    //     // 여기까지는 실행 컨텍스트에 대한 참조를 생성하지 않는다
+    //     // 따라서 실행 컨텍스트 객체는 가비지 컬렉터에 의해 바로 제거될 수 있다.
+    //
+    //     curryLog('fred')
+    //
+    //     logHello() // hello
+    //     logStayInAlive() // stayin alive!
+    //     logGoodbye() // goodby
+    //     logHello() // hello
+    //     // ?[M]함수를 호출하여 각각에 대해 실행 컨텍스트에 대한 참조 생성?
+    //
+    //     //책의 의도와 달리 제거가 안 되었다. window.함수명 으로 실행 컨텍스트 객체에 접근이 안 되는 듯?
+    //     if (typeof window !== "undefined") { // 브라우저에서 동작
+    //         delete window.logHello // 'hello' 의 실행 컨텍스트 객체에 대한 참조를 제거한다
+    //         delete window.logStayInAlive // 'stayin alive!' 의 실행 컨텍스트 객체에 대한 참조를 제거한다
+    //     }
+    //     logGoodbye()
+    //     logStayInAlive()
+    //     // (브라우저)stayin alive! - 책의 의도는 undefined 인데, JS 버전 차이인지 windows 객체로 실행 컨텍스트 접근이 안 되는 건지 delete 가 안 되었다.
+    // })()
+
+    ;(function closureHowtoByExecutionContext4(){
+        function sendAjaxRequest($) {
+            const scope_var= 'yay'
+            $.ajax({
+                success: function () {
+                    console.log(scope_var)
+                }
+            });
+        }
+        sendAjaxRequest(jQuery); // yay
+    })()
 </script>
 </body>
 </html>
