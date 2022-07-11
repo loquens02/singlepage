@@ -1,0 +1,161 @@
+<!--<!DOCTYPE html>-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SPA 1장-1.2.2절</title>
+    <style>
+        body {
+            /*브라우저 바깥 숨기기*/
+            width: 100vw;
+            height: 100vw;
+            overflow: hidden;
+            background-color: #777;
+        }
+
+        #spa {
+            /*컨테이너*/
+            position: absolute;
+            top: 8px;
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
+            border-radius: 8px 8px 0 8px;
+            background-color: #fff;
+        }
+
+        .spa-slider {
+            /*우측 하단 빨갛게*/
+            position: absolute;
+            bottom: 0;
+            right: 2px;
+            width: 300px;
+            height: 16px;
+            cursor: pointer;
+            border-radius: 8px 0 0 0;
+            background-color: #f00;
+        }
+
+    </style>
+</head>
+<body>
+<div id="spa">
+<!--    js 에서 렌더링하므로 slider 제거 가능 <div class="spa-slider"></div>-->
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script type="text/javascript">
+    /*jslint browser: true, continue: true,
+    devel: true, indent: 2, maxerr: 50,
+    newcap: true, nomen: true, plusplus: true,
+    regexp: true, sloppy: true, vars: true,
+    white: true
+    */
+
+    /*전역 jQuery*/
+    // SPA 모듈. 채팅 슬라이더 기능을 제공
+    const spa = (function () {
+        //모듈 스코프 변수 선언
+        const configMap = { // 모듈 설정값
+                extended_height: 434,
+                extended_title: 'Click to retract',
+                retracted_height: 16,
+                retracted_title: 'Click to extend',
+                template_html: '<div class="spa-slider"></div>'
+            }
+        // 그 외 나머지 모듈 스코프 변수 미리 선언. 나중에 실수로 전역변수로 만들 수도 있으니 미리 만들어 둠.
+        let
+            $chatSlider,
+            toggleSlider, onClickSlider, initModule
+
+        //DOM 메서드 /toggleSlider. 모든 DOM 조작 메서드를 한데 모아둔다. 슬라이더 높이 조정.
+        toggleSlider = function () {
+            const slider_height = $chatSlider.height()
+            // 슬라이더가 닫혀있으면 연다
+            if (slider_height === configMap.retracted_height) {
+                $chatSlider
+                    .animate({height: configMap.extended_height})
+                    .attr('title', configMap.extended_title)
+                return true
+            }
+            // 슬라이더가 열려있으면 닫는다
+            else if (slider_height === configMap.extended_height) {
+                $chatSlider
+                    .animate({height: configMap.retracted_height})
+                    .attr('title', configMap.retracted_title)
+                return true
+            }
+        }
+
+        //이벤트 핸들러 /onClickSlider. 클릭 이벤트를 받고 toggleSlider를 호출
+        onClickSlider = function (event) {
+            toggleSlider()
+            return false
+        }
+
+        //public 메서드 /initModule. 초기 상태 설정 및 기능을 제공
+        initModule = function ($container) {
+            //HTML 렌더링
+            $container.html(configMap.template_html)
+            $chatSlider= $container.find('.spa-slider')
+            //슬라이더 높이 및 제목 초기화. 클릭 이벤트와 이벤트 핸들러 바인딩. 제목 설정 후 바인딩
+            $chatSlider
+                .attr('title', configMap.retracted_title)
+                .click(onClickSlider)
+            return true
+        }
+
+        // spa 네임스페이스에서 객체 반환 > public 메서드 노출
+        return {initModule: initModule}
+    })(jQuery)
+    // DOM 이 준비되면 SPA를 실행
+    jQuery(document).ready(
+        function (){spa.initModule(jQuery('#spa'))}
+    )
+
+    // if (typeof window !== "undefined") {
+    //     window.onload = function () {
+    //         window.alert('window loaded')
+    //     }
+    // }
+
+    // var regular_joe= 'Global variable';
+    // console.log(regular_joe);
+    // if (typeof window !== "undefined") {
+    //     console.log(window.regular_joe)
+    //     console.log(regular_joe === window.regular_joe)
+    // }
+
+    // ajax 호출에서 this(bad)- ajax 객체가 호출자라서 의도(names 을 품고있던 객체)대로 안 나온다
+    // ;(function ($) {
+    //     const prison= {
+    //         names: 'John and Mike',
+    //         who: function () {
+    //             $.ajax({
+    //                 success: function () {
+    //                     // console.log(this.names) // undefined
+    //                     console.log(this)
+    //                 }
+    //             })
+    //         }
+    //     }
+    //     prison.who()
+    // })(jQuery)
+
+    // ajax 호출에서 this(Good)- ajax 호출 문맥 밖에서 다른 변수에 this 를 받아둬야 한다. 그리고 '다른 변수'를 읽고. 음..
+    ;(function ($) {
+        const prison= {
+            names: 'John and Mike',
+            who: function () {
+                const thats= this
+                $.ajax({
+                    success: function () {
+                        console.log(thats.names) // John and Mike
+                        // console.log(this) // ajax 객체
+                    }
+                })
+            }
+        }
+        prison.who()
+    })(jQuery)
+</script>
+</body>
+</html>
