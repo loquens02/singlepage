@@ -30,7 +30,7 @@ function closureBase() {
     const mikePrison= makePrison('Mike')
 }
 
-// cf. spa.html/ajax 호출에서 this(Good). dom 과 함께 둬야 정상실행가능
+// cf. practice.html/ajax 호출에서 this(Good). dom 과 함께 둬야 정상실행가능
 function closureAjax() {
     // 클로저 예제3- this
     const prisonNormal= {
@@ -42,7 +42,7 @@ function closureAjax() {
     // console.log(prisonNormal.who()) //Mike and John
 
     // 클로저 예제4- Ajax 에서 this 는 Ajax 호출 자체
-    // 이건 html dom 코드 연계해서 실행해야 > spa.html 하단부
+    // 이건 html dom 코드 연계해서 실행해야 > practice.html 하단부
     const prison= {
         names: 'John and Mike',
         who: function () {
@@ -77,7 +77,7 @@ function closureHowtoByExecutionContext1() {
 
 }
 
-// 클로저 작동 원리 예제2- cf.spa.html --Fail- 이제는 window 로 실행 컨텍스트 객체 접근이 안 되나?
+// 클로저 작동 원리 예제2- cf.practice.html --Fail- 이제는 window 로 실행 컨텍스트 객체 접근이 안 되나?
 function closureHowtoByExecutionContext2() {
     let curryLog, logHello, logStayInAlive, logGoodbye
     curryLog= function (arg_text) {
@@ -136,7 +136,7 @@ function closureHowtoByExecutionContext3(){
     // == 클로저
 }
 
-// 클로저 예제4- cf. spa.html
+// 클로저 예제4- cf. practice.html
 ;(function closureHowtoByExecutionContext4(){
     function sendAjaxRequest($) {
         const scope_var= 'yay'
