@@ -2,7 +2,7 @@
   "name": "singlepage",
   "version": "1.0.0",
   "description": "",
-  "main": "syntaxScope.js",
+  "main": "syntax/syntaxScope.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
