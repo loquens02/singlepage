@@ -1,0 +1,95 @@
+/*명명 spa-shell- : 이 클래스를 spa.shell.js 에서 관리
+외부 모듈과 네임스페이스가 충돌하지 않음
+html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하는 지 알 수 있음
+*/
+.spa-shell-head, .spa-shell-head-logo, .spa-shell-head-acct,
+.spa-shell-head-search, .spa-shell-main, .spa-shell-main-nav,
+.spa-shell-main-content, .spa-shell-foot, .spa-shell-chat, .spa-shell-modal {
+    position: absolute;
+}
+
+.spa-shell-head {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+}
+
+.spa-shell-head-logo {
+    top: 4px;
+    left: 4px;
+    width: 128px;
+    height: 32px;
+    background: orange;
+}
+
+.spa-shell-head-acct {
+    top: 4px;
+    right: 64px;
+    width: 248px;
+    height: 32px;
+    background: blue;
+}
+
+.spa-shell-main {
+    top: 40px;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+}
+
+.spa-shell-main-content,
+.spa-shell-main-nav {
+    top: 0;
+    bottom: 0;
+}
+
+.spa-shell-main-nav {
+    width: 250px;
+    background: #eee;
+}
+
+    /*자식 엘리먼트에 영향을 주는 부모 클래스 사용*/
+    /*nav 에서는 none 이나 width 나 보이는 게 같다. 나중에 애니메이션 차이가 있겠지*/
+    .spa-x-closed .spa-shell-main-nav {
+        /*display: none;*/
+        width: 0;
+    }
+
+.spa-shell-main-content {
+    left: 250px;
+    right: 0;
+    background: #ddd;
+}
+
+    /*display:none; 으로 하면 색상이 사라진다*/
+    .spa-x-closed .spa-shell-main-content {
+        left: 0;
+    }
+
+.spa-shell-foot {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+}
+
+.spa-shell-chat {
+    bottom: 0;
+    right: 0;
+    width: 300px;
+    height: 15px;
+    background: red;
+    z-index: 1;
+}
+
+.spa-shell-modal {
+    margin-top: -200px;
+    margin-left: -200px;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    height: 400px;
+    background: #fff;
+    z-index: 2;
+}
