@@ -74,8 +74,9 @@ spa.shell = (function () {
                     {height: configMap.chat_extend_height},
                     configMap.chat_extend_time,
                     function () {
-                        jqueryMap.$chat.css({height: 'auto'})
-                        if (callback) callback(jqueryMap.$chat)
+                        if (callback) {
+                            callback(jqueryMap.$chat)
+                        }
                     }
                 )
                 return true
@@ -87,14 +88,17 @@ spa.shell = (function () {
                 {height: configMap.chat_retract_height},
                 configMap.chat_retract_time,
                 function () {
-                    //경쟁 조건을 피한다
                     if (callback) {
-                        callback(jqueryMap.$chat) // 어디서 온 callback ??
+                        //경쟁 조건을 피한다
+                        callback(jqueryMap.$chat)
                     }
                 }
             )
             return true
+            // 채팅 슬라이더 축소 끝
         }
+        // DOM 메서드 /toggleChat/ 시작
+
 
         // --- DOM 메서드 끝 ---
 
@@ -104,9 +108,20 @@ spa.shell = (function () {
         // --- public 메서드(외부 노출) 시작 ---
         // public 메서드 /initModule/ 시작
         initModule = function ($container) {
+            // HTML 을 로드한 후 jQuery 컬렉션 객체를 매핑한다
             stateMap.$container = $container
             $container.html(configMap.main_html)
             setJqueryMap()
+
+            // 토글 테스트
+            setTimeout(function () {
+                    toggleChat(true)
+                }, 3000 // 3초 후에 열림
+            )
+            setTimeout(function () {
+                    toggleChat(false)
+                }, 8000 // 8초 후에 닫힘 (3+5초)
+            )
         }
         // public 메서드 /initModule/ 끝
 
