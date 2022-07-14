@@ -25,6 +25,8 @@ spa.shell = (function () {
                 + '<div class="spa-shell-foot"></div>'
                 + '<div class="spa-shell-chat"></div>'
                 + '<div class="spa-shell-modal"></div>',
+            
+            // 요구1. 슬라이더가 움직이는 속도와 높이를 개발자가 설정할 수 있다
             chat_extend_time: 1000, // 채팅 연장 시간
             chat_retract_time: 300, // 채팅 축소 시간
             chat_extend_height: 450, // 채팅 연장 높이
@@ -54,6 +56,7 @@ spa.shell = (function () {
         // DOM 메서드 /toggleChat/ 시작
         /**
          * 채팅 슬라이더 영역을 열고 닫는다
+         * 요구2. 채팅 슬라이더의 열기/닫기를 담당하는 단일 메서드를 만든다
          * @param do_extend true 이면 채팅 슬라이더를 열고, false 이면 닫는다
          * @param callback 애니메이션 종료 시점에 callback 함수 실행
          * @cfg chat_extend_time, chat_retract_time, chat_extend_height, chat_retract_height 설정
@@ -66,7 +69,7 @@ spa.shell = (function () {
             const is_sliding = !is_open && !is_closed
             if (is_sliding) {
                 return false
-            } // 열리자마자 닫히는 경쟁조건 피하기
+            } // 요구3. 열리자마자 닫히는 경쟁조건 피하기. 슬라이더 애니메이션이 실행 중일 때는 함수 종료
 
             // 채팅 슬라이더 확장 시작
             if (do_extend) {
@@ -74,6 +77,7 @@ spa.shell = (function () {
                     {height: configMap.chat_extend_height},
                     configMap.chat_extend_time,
                     function () {
+                        // 요구4. 슬라이더의 동작이 끝나는 시점에 '호출할 수 있는 콜백 함수'를 개발자가 임의로 넘겨줄 수 있다
                         if (callback) {
                             callback(jqueryMap.$chat)
                         }
@@ -113,7 +117,7 @@ spa.shell = (function () {
             $container.html(configMap.main_html)
             setJqueryMap()
 
-            // 토글 테스트
+            // 요구5. 토글 테스트. 슬라이더가 정상 작동하는지 확인
             setTimeout(function () {
                     toggleChat(true)
                 }, 3000 // 3초 후에 열림
