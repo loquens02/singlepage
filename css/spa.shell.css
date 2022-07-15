@@ -82,7 +82,10 @@ html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하�
     /*슬라이더 영역에 커서가 올라가 있으면 커서 아이콘 변경 > 사용자에게 클릭 가능한 영역임을 알려줌1*/
     cursor: pointer;
     background: red;
-    z-index: 1;
+    /*둥근 모서리*/
+    border-radius: 5px 0 0 0;
+    /*숫자가 커야 더 '사용자 눈'에 가깝게 다가온다*/
+    z-index: 2;
 }
 /*슬라이더 배경색 변경 > 사용자에게 클릭 가능한 영역임을 알려줌2*/
 .spa-shell-chat:hover {
@@ -97,5 +100,5 @@ html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하�
     width: 400px;
     height: 400px;
     background: #fff;
-    z-index: 2;
+    z-index: 1;
 }
