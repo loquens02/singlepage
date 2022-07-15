@@ -119,7 +119,12 @@ spa.shell = (function () {
 
         // --- 이벤트 핸들러 시작 ---
         onClickChat = function () {
-            toggleChat(stateMap.is_chat_retracted)
+            if(toggleChat(stateMap.is_chat_retracted)){
+                $.uriAnchor.setAnchor(({
+                    chat: (stateMap.is_chat_retracted ? 'open' : 'closed')
+                }))
+            }
+
             return false
             // return false 효과
             // 1.jQuery 기본 동작을 수행하지 않도록 한다(링크 따라가기, 텍스트 선택 등) == event.preventDefault()
