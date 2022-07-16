@@ -56,7 +56,7 @@ spa.shell = (function () {
         // --- 유틸리티 메서드 ---
         /**
          * 저장된 앵커 맵의 복사본 반환 => 연산 부담 최소화
-         * @returns {any|jQuery} jQuery.extend 유틸리티로 객체 복사. 그냥 넘기면 JS는 참조값만 전달하므로.
+         * @returns {stateMap.anchor_map} jQuery.extend 유틸리티로 객체 복사. 그냥 넘기면 JS는 참조값만 전달하므로.
          * @function 유틸리티 메서드: 페이지 엘리먼트와 상호작용하지 않는 함수
          */
         copyAnchorMap = function (){
@@ -201,7 +201,7 @@ spa.shell = (function () {
             const anchor_map_previous = copyAnchorMap()
             let anchor_map_proposed
             let _s_chat_previous, _s_chat_proposed, s_chat_proposed
-            
+
             // 앵커 파싱 시도
             try {
                 anchor_map_proposed = $.uriAnchor.makeAnchorMap()
@@ -212,10 +212,12 @@ spa.shell = (function () {
             }
             stateMap.anchor_map = anchor_map_proposed
 
-            // 편의 변수
+            // 편의 변수 - 임의로 만든 변수.
             _s_chat_previous = anchor_map_previous._s_chat
             _s_chat_proposed = anchor_map_proposed._s_chat
             // console.log(anchor_map_previous.hasOwnProperty('_s_chat')) // slider open-closed 시, true
+            // 앵커 파싱(_proposed)이 실패했을 때 _previous 가 true 되고 onHashchange가 끝났다가
+            // 다음에 다시 앵커 파싱 시도가 성공했을 때는 anchor_map_previous 가 이미 true 이니 ._s_chat 에 접근 가능하게 되어 .has 값이 true 가 된다??
 
             // 변경된 경우 채팅 컴포넌트 조정 시작
             if (!anchor_map_previous || _s_chat_previous !== _s_chat_proposed) {
@@ -252,6 +254,23 @@ spa.shell = (function () {
             })
             return false
         }
+
+        /**
+         * 다음 URI 로도 접근 가능
+         * URI: http://localhost:63342/singlepage/spa.html#!chat=profile:on:uid,suzie|status,green
+         *
+         */
+        tempURI = function () {
+            const tempAnchorMap= {
+                profile: 'on',
+                _profile:{
+                    uid: 'suzie',
+                    status: 'green'
+                }
+            }
+            $.uriAnchor.setAnchor(tempAnchorMap, null, true)
+        }
+
         // --- /이벤트 핸들러 ---
 
         // --- public 메서드(외부 노출) ---
@@ -282,6 +301,8 @@ spa.shell = (function () {
             $.uriAnchor.configModule({
                 schema_map : configMap.anchor_schema_map
             })
+
+            // tempURI()
 
             // URI 앵커 변경 이벤트 처리
             // 이 작업은 모든 기능 모듈이 설정 및 초기화된 후에 수행된다
