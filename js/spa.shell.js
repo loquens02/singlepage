@@ -256,6 +256,15 @@ spa.shell = (function () {
         }
 
         /**
+         * setChatAnchor API. 앵커의 채팅 컴포넌트를 변경
+         * @example setChatAnchor('closed')
+         * @param position_type 'closed' 또는 'opened' 중 하나
+         * @function 변경 가능한 경우 URI 앵커 파라미터 'chat' 을 요청한 값으로 변경
+         * @return true 요청한 앵커 부분을 업데이트 한 경우, false 요청한 앵커 부분을 업데이트하지 못한 경우
+         */
+        // setChatAnchor API
+
+        /**
          * 다음 URI 로도 접근 가능
          * URI: http://localhost:63342/singlepage/spa.html#!chat=profile:on:uid,suzie|status,green
          *
