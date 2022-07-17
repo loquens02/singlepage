@@ -1,19 +1,31 @@
 <!DOCTYPE html>
+<!--
+spa.html
+spa 브라우저 문서
+-->
 <html lang="en">
 <head>
+    <!--  IE9 이상의 표준 지원  -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta content="text/html" charset="UTF-8">
-    <title>SPA starter</title>
-    <!--    style sheet-->
-    <link rel="stylesheet" href="css/spa.css" type="text/css"/>
+    <title>SPA Chapter 4</title>
+    <!--    서드파티 스타일 시트 -->
+
+    <!--  my style sheet  -->
+    <link rel="stylesheet" href="css/spa.css" type="text/css"/> <!-- 순서1: 상위 모듈-->
+    <link rel="stylesheet" href="css/spa.chat.css" type="text/css"/> <!-- 순서2: 하위 모듈-->
     <link rel="stylesheet" href="css/spa.shell.css" type="text/css"/>
 
     <!--    서드파티 JS-->
-    <script src="js/jq/jquery-3.6.0.js"></script>
+    <script src="js/jq/jquery-3.6.0.js"></script> <!-- 순서1: 상위 모듈-->
     <script src="js/jq/jquery.uriAnchor-1.3.3.js"></script> <!--URI 앵커 컴포넌트 관리-->
 
-    <!--    my js-->
-    <script src="js/spa.js"></script>
+    <!--    my JS-->
+    <script src="js/spa.js"></script> <!-- 순서1: 상위 모듈-->
+    <script src="js/spa.util.js"></script><!-- 순서2: 모든 모듈에서 사용하는 공통 유틸리티 모듈-->
+    <script src="js/spa.model.js"></script> <!--브라우저 모델-->
     <script src="js/spa.shell.js"></script>
+    <script src="js/spa.chat.js"></script> <!-- 순서N: 셸을 로드한 다음 기능 모듈을 로드-->
     <script>
         $(function () { spa.initModule( $('#spa')); }); // Dom 준비되면 app 초기화
     </script>
