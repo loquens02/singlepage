@@ -2,3 +2,124 @@
 spa.chat.css
 Chat feature styles
  */
+.spa-chat {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 25em;
+    height: 2em;
+    background: #fff;
+    border-radius: 0 0.5em 0 0;
+    border-style: solid;
+    border-width: thin 0 0 thin;
+    border-color: #888;
+    box-shadow: 0 0 0.75em 0 #888;
+    z-index: 1;
+}
+
+.spa-chat-head, .spa-chat-closer {
+    position: absolute;
+    top: 0;
+    height: 2em;
+    line-height: 1.8em;
+    border-bottom: thin solid #888;
+    cursor: pointer;
+    background: #888;
+    color: white;
+    font-family: arial, helvetica, sans-serif;
+    font-weight: 800;
+    text-align: center;
+}
+
+/*이 클래스를 사용한 엘리먼트에는 spa-chat-head-toggle, spa-chat-head-title 클래스 엘리먼트가 있어야 한다*/
+.spa-chat-head {
+    left: 0;
+    width: 2em;
+    border-radius: 0.3em 0 0 0;
+}
+
+/*구석에 X 표시*/
+.spa-chat-closer {
+    right: 0;
+    width: 2em;
+}
+
+.spa-chat-closer:hover {
+    background: #f00;
+}
+/*spa-chat-head-toggle 클래스는 spa-chat-head 내에 있어야 한다*/
+.spa-chat-head-toggle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2em;
+    bottom: 0;
+    border-radius: 0.3em 0 0 0;
+}
+
+.spa-chat-head-title {
+    position: absolute;
+    left: 50%;
+    width: 16em;
+    /*음의 마진: left/top 에 적용시 크기만큼 왼쪽/위로 움직인다. right/bottom 적용시 다음 요소가 크기만큼 당겨진다*/
+    margin-left: -8em;
+}
+.spa-chat-sizer {
+    position: absolute;
+    top: 2em;
+    left: 0;
+    right: 0;
+}
+
+.spa-chat-msgs {
+    position: absolute;
+    top: 1em;
+    left: 1em;
+    right: 1em;
+    bottom: 4em;
+    padding: 0.5em;
+    border: thin solid #888;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.spa-chat-box {
+    position: absolute;
+    height: 2em;
+    left: 1em;
+    right: 1em;
+    bottom: 1em;
+    border: thin solid #888;
+    background: #888;
+}
+
+.spa-chat-box input[type=text] {
+    float: left;
+    width: 75%;
+    height: 100%;
+    padding: 0.5em;
+    border: 0;
+    background: #ddd;
+    color: #404040;
+}
+
+/*box 클래스(submit 버튼)에 있는 임의의 div 에 스타일 적용하는 규칙*/
+.spa-chat-box div {
+    float: left;
+    width: 25%;
+    height: 2em;
+    line-height: 1.9em;
+    text-align: center;
+    color: #fff;
+    font-weight: 800;
+    cursor: pointer;
+}
+/*submit 버튼 강조*/
+.spa-chat-box div:hover {
+    background: #444;
+    color: #ff0
+}
+/*커서가 head 위로 올라갈 때마다 */
+.spa-chat-head:hover .spa-chat-head-toggle {
+    background: #aaa;
+}

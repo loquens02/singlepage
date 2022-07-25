@@ -4,7 +4,7 @@ html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하�
 */
 .spa-shell-head, .spa-shell-head-logo, .spa-shell-head-acct,
 .spa-shell-head-search, .spa-shell-main, .spa-shell-main-nav,
-.spa-shell-main-content, .spa-shell-foot, .spa-shell-chat, .spa-shell-modal {
+.spa-shell-main-content, .spa-shell-foot, /*.spa-shell-chat,*/ .spa-shell-modal {
     position: absolute;
 }
 
@@ -73,25 +73,28 @@ html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하�
     right: 0;
     height: 40px;
 }
-
+/*
+spa.chat.css 로 이동
 .spa-shell-chat {
     bottom: 0;
     right: 0;
     width: 300px;
     height: 15px;
-    /*슬라이더 영역에 커서가 올라가 있으면 커서 아이콘 변경 > 사용자에게 클릭 가능한 영역임을 알려줌1*/
+    !*슬라이더 영역에 커서가 올라가 있으면 커서 아이콘 변경 > 사용자에게 클릭 가능한 영역임을 알려줌1*!
     cursor: pointer;
     background: red;
-    /*둥근 모서리*/
+    !*둥근 모서리*!
     border-radius: 5px 0 0 0;
-    /*숫자가 커야 더 '사용자 눈'에 가깝게 다가온다*/
+    !*숫자가 커야 더 '사용자 눈'에 가깝게 다가온다*!
     z-index: 2;
 }
-/*슬라이더 배경색 변경 > 사용자에게 클릭 가능한 영역임을 알려줌2*/
+!*슬라이더 배경색 변경 > 사용자에게 클릭 가능한 영역임을 알려줌2*!
 .spa-shell-chat:hover {
     background: #a00;
 }
-
+*/
+/*
+채팅 슬라이더를 방해하지 않도록 주석
 .spa-shell-modal {
     margin-top: -200px;
     margin-left: -200px;
@@ -102,3 +105,4 @@ html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하�
     background: #fff;
     z-index: 1;
 }
+*/
