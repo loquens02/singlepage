@@ -31,10 +31,10 @@ Chat feature styles
     text-align: center;
 }
 
-/*이 클래스를 사용한 엘리먼트에는 spa-chat-head-toggle, spa-chat-head-title 클래스 엘리먼트가 있어야 한다*/
+/*채팅창 상단 배경. 이 클래스를 사용한 엘리먼트에는 spa-chat-head-toggle, spa-chat-head-title 클래스 엘리먼트가 있어야 한다*/
 .spa-chat-head {
     left: 0;
-    width: 2em;
+    right: 2em;
     border-radius: 0.3em 0 0 0;
 }
 
@@ -57,12 +57,14 @@ Chat feature styles
     border-radius: 0.3em 0 0 0;
 }
 
+/*p.174*/
 .spa-chat-head-title {
     position: absolute;
     left: 50%;
     width: 16em;
     /*음의 마진: left/top 에 적용시 크기만큼 왼쪽/위로 움직인다. right/bottom 적용시 다음 요소가 크기만큼 당겨진다*/
     margin-left: -8em;
+    /*margin-left: 4em;*/
 }
 .spa-chat-sizer {
     position: absolute;

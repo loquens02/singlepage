@@ -18,7 +18,7 @@ spa.chat = (function () {
             + '        <div class="spa-chat-head-toggle">+</div>'
             + '        <div class="spa-chat-head-title">Chat</div>'
             + '    </div>'
-            + '    <div class="spa-chat-closer"></div>'
+            + '    <div class="spa-chat-closer">x</div>'
             + '    <div class="spa-chat-sizer">'
             + '        <div class="spa-chat-msgs"></div>'
             + '        <div class="spa-chat-box"><input type="text"/>'
@@ -166,7 +166,7 @@ spa.chat = (function () {
                 height_px = stateMap.slider_opened_px
                 animate_time = configMap.slider_open_time
                 slider_title = configMap.slider_opened_title
-                toggle_text = '='
+                toggle_text = '-'
                 break;
             case 'hidden':
                 height_px = 0
