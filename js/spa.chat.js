@@ -122,15 +122,35 @@ spa.chat = (function () {
             height: (opened_height_em - 2) * px_per_em
         })
     }
+    // --- /DOM 메서드 ---
 
+    // --- 이벤트 핸들러 ---
+    /**
+     * URI 앵커를 변경하는 메서드 호출
+     * @return {boolean} false - 셸에 있는 hashchage 이벤트 핸들러에게 변경 사항 처리 위탁 후 바로 종료
+     * @function 이벤트 핸들러
+     */
+    onClickToggle = function () {
+        const set_chat_anchor = configMap.set_chat_anchor
+        if (stateMap.position_type === 'opened') {
+            set_chat_anchor('closed')
+        } else if (stateMap.position_type === 'closed') {
+            set_chat_anchor('opened')
+        }
+        return false
+    }
+    // --- /이벤트 핸들러 ---
+
+    // --- public 메서드 ---
     /**
      * setSliderPosition API. 셸이 요청한 위치로 슬라이더 조정
      * @example spa.chat.setSliderPosition('closed')
      * @param position_type {Enumerator} 'closed', 'opened', 'hidden'
      * @param callback {function(document)} 애니메이션 완료 시점에 호출할 콜백 선택
-     * @function 요청한 상태와 현재 상태가 일치하면 슬라이더를 현재 상태대로 둔다
+     * @function public 메서드- 요청한 상태와 현재 상태가 일치하면 슬라이더를 현재 상태대로 둔다
      * - 요청한 상태와 현재 상태가 다르면, 요청한 상태로 애니메이션을 진행한다
      * @return true 요청한 상태로 전환한 경우, false 요청 상태로 전환하지 못한 경우
+     * @see p.181
      */
     setSliderPosition = function (position_type, callback) {
         let height_px, animate_time, slider_title, toggle_text
@@ -181,36 +201,17 @@ spa.chat = (function () {
         )
         return true
     }
-    // --- /DOM 메서드 ---
 
-    // --- 이벤트 핸들러 ---
-    /**
-     * URI 앵커를 변경하는 메서드 호출
-     * @return {boolean} false - 셸에 있는 hashchage 이벤트 핸들러에게 변경 사항 처리 위탁 후 바로 종료
-     * @function 이벤트 핸들러
-     */
-    onClickToggle = function () {
-        const set_chat_anchor = configMap.set_chat_anchor
-        if (stateMap.position_type === 'opened') {
-            set_chat_anchor('closed')
-        } else if (stateMap.position_type === 'closed') {
-            set_chat_anchor('opened')
-        }
-        return false
-    }
-    // --- /이벤트 핸들러 ---
-
-    // --- public 메서드 ---
     /**
      * 초기화 이전에 모듈을 설정. 허용된 키의 설정 조정
      * @example spa.chat.configModule({slider_open_em:18})
      * @param input_map 설정 가능한 키와 값으로 구성된 맵. color_name: 사용할 색상
-     * @param set_chat_anchor TODO 열린(opened) 상태나 닫힌(closed) 상태를 나타내게끔 URI 앵커를 수정하기 위한 콜백
-     * <br> 요청한 상태를 반영할 수 없는 경우, 이 콜백에서는 false 를 반환해야 한다
-     * @param chat_model TODO 채팅 모델 객체는 인스턴트 메시징과 상호작용하는 메서드를 제공한다
-     * @param people_model TODO people 모델 객체는 모델에서 가진 사람들 목록을 관리하는 메서드를 제공한다
-     * @param slider_* TODO 설정. 모든 설정은 스칼라값이다
-     * @see mapConfig.settable_map 전체 설정목록
+     * @cfg set_chat_anchor 열린(opened) 상태나 닫힌(closed) 상태를 나타내게끔 URI 앵커를 수정하기 위한 콜백
+     * 요청한 상태를 반영할 수 없는 경우, 이 콜백에서는 false 를 반환해야 한다
+     * @cfg chat_model 채팅 모델 객체는 인스턴트 메시징과 상호작용하는 메서드를 제공한다
+     * @cfg people_model people 모델 객체는 모델에서 가진 사람들 목록을 관리하는 메서드를 제공한다
+     * @cfg slider_* 설정. 모든 설정은 스칼라값이다
+     * @see mapConfig.settable_map 전체 설정목록, cfg => spa.chat.configModule
      * @return {Boolean} true
      * @function public 메서드 - 넘겨받은 인자를 사용해 내부 설정 데이터 객체(configMap)를 업데이트 한다.
      * @exception JS 에러 객체 및 넘겨받을 수 없거나 누락된 인자에 대한 스택 트레이스

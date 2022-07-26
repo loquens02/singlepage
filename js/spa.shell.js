@@ -18,7 +18,7 @@ spa.shell = (function () {
          */
         const configMap = {
             anchor_schema_map: { // uriAnchor 에서 유효성 검사에 사용할 맵 정의
-                chat: { open: true, closed: true}
+                chat: { opened: true, closed: true}
             },
             main_html: String()
                 + '<div class="spa-shell-head">'
@@ -32,24 +32,24 @@ spa.shell = (function () {
                 + '</div>'
                 + '<div class="spa-shell-foot"></div>'
                 + '<div class="spa-shell-chat"></div>'
-                + '<div class="spa-shell-modal"></div>',
+                + '<div class="spa-shell-modal"></div>'
             
             // 요구1-1. 슬라이더가 움직이는 속도와 높이를 개발자가 설정할 수 있다
-            chat_extend_time: 250, // 채팅 연장 시간. 작을수록 빠름
-            chat_retract_time: 300, // 채팅 축소 시간
-            chat_extend_height: 450, // 채팅 연장 높이
-            chat_retract_height: 15, // 채팅 축소 높이
-            chat_extended_title: 'Click to retract', // 사용자 툴팁. 클릭하면 닫힙니다
-            chat_retracted_title: 'Click to extend', // 사용자 툴팁. 클릭하면 열립니다
+            // chat_extend_time: 250, // 채팅 연장 시간. 작을수록 빠름
+            // chat_retract_time: 300, // 채팅 축소 시간
+            // chat_extend_height: 450, // 채팅 연장 높이
+            // chat_retract_height: 15, // 채팅 축소 높이
+            // chat_extended_title: 'Click to retract', // 사용자 툴팁. 클릭하면 닫힙니다
+            // chat_retracted_title: 'Click to extend', // 사용자 툴팁. 클릭하면 열립니다
         }
         const stateMap = {
-            $container: null,
+            // $container: null,
             anchor_map: {}, // 현재 앵커 값을 모듈 상태 맵인 stateMap, anchor_map 에 저장한다
-            is_chat_retracted: true, // 채팅 축소 상태. toggleChat() 함수를 호출하면 반대로 바뀜
+            // is_chat_retracted: true, // 채팅 축소 상태. toggleChat() 함수를 호출하면 반대로 바뀜
         } // 모듈 사이에 공유하는 동적 정보
 
         let jqueryMap = {} // jQuery 컬렉션 객체 캐싱
-        let setJqueryMap, initModule, toggleChat, onClickChat
+        let setJqueryMap, initModule, setChatAnchor //, onClickChat, toggleChat
         let copyAnchorMap, changeAnchorPart, onHashchange
         // --- /모듈 스코프 변수 ---
 
@@ -72,8 +72,8 @@ spa.shell = (function () {
         setJqueryMap = function () { //
             const $container = stateMap.$container
             jqueryMap = {
-                $container: $container,
-                $chat: $container.find('.spa-shell-chat') // 채팅 슬라이더 jQuery 컬렉션 캐싱
+                $container: $container
+                // $chat: $container.find('.spa-shell-chat') // 채팅 슬라이더 jQuery 컬렉션 캐싱
             }
         }
 
@@ -133,8 +133,7 @@ spa.shell = (function () {
             return bool_return
         }
 
-        /**
-         * 채팅 슬라이더 영역을 열고 닫는다.
+        /* * 채팅 슬라이더 영역을 열고 닫는다.
          * 요구1-2. 채팅 슬라이더의 열기/닫기를 담당하는 단일 메서드를 만든다. 열기 닫기 속도 조절 가능.
          * @param do_extend true 이면 채팅 슬라이더를 열고, false 이면 닫는다
          * @param callback 애니메이션 종료 시점에 callback 함수 실행
@@ -142,7 +141,6 @@ spa.shell = (function () {
          * @cfg stateMap.is_chat_retracted true 이면 채팅 슬라이더를 닫고, false 이면 확장한다
          * @returns {boolean} true - 슬라이더 애니메이션이 실행된다, false - 슬라이더 애니메이션이 실행되지 않는다
          * @function DOM 메서드: 페이지 엘리먼트를 생성하고 조작하는 함수
-         */
         toggleChat = function (do_extend, callback) {
             const px_chat_ht = jqueryMap.$chat.height()
             const is_open = px_chat_ht === configMap.chat_extend_height
@@ -185,7 +183,7 @@ spa.shell = (function () {
             )
             return true
             // 채팅 슬라이더 축소 끝
-        }
+        }*/
         // --- /DOM 메서드 ---
 
         // --- 이벤트 핸들러 ---
@@ -194,11 +192,13 @@ spa.shell = (function () {
          * @return {boolean} false
          * @desc
          * - URI 앵커 컴포넌트를 파싱
-         * - 새로운 애플리케이션 상태를 현재 상태와 비교
-         * - 현재 상태와 다를 때만 애플리케이션의 상태를 변경
+         * - 요청받은 애플리케이션 상태를 현재 상태와 비교
+         * - 요청받은 상태가 기존 상태와 다르고,  앵커 스키마에서 이 상태를 허용할 때만 상태를 변경
+         * @function 이벤트 핸들러
          */
         onHashchange = function () {
             const anchor_map_previous = copyAnchorMap()
+            let is_ok= true
             let anchor_map_proposed
             let _s_chat_previous, _s_chat_proposed, s_chat_proposed
 
@@ -223,51 +223,78 @@ spa.shell = (function () {
             if (!anchor_map_previous || _s_chat_previous !== _s_chat_proposed) {
                 s_chat_proposed = anchor_map_proposed.chat
                 switch (s_chat_proposed) {
-                    case 'open': // caution: 무지성 copilot 하지 말 것.
-                        toggleChat(true)
+                    case 'opened': // caution: 무지성 copilot 하지 말 것.
+                        is_ok = spa.chat.setSliderPosition('opened') // spa.chat 에서 return 으로 노출한 public 메서드
+                        // toggleChat(true)
                         break;
                     case 'closed':
-                        toggleChat(false)
+                        // 넘겨받은 위치를 uriAnchor 설정에서 허용하지 않으면 URI 앵커 파라미터인 Chat 을 제거하고 기본 위치로 되돌린다
+                        // test: #!chat=fred
+                        is_ok = spa.chat.setSliderPosition('closed')
+                        // toggleChat(false)
                         break;
                     default:
-                        toggleChat(false) // 기딴 거 들어오면 앵커 없는 걸로 URI 정하기
+                        // toggleChat(false) // 기딴 거 들어오면 앵커 없는 걸로 URI 정하기
+                        spa.chat.setSliderPosition('closed')
                         delete anchor_map_proposed.chat
                         $.uriAnchor.setAnchor(anchor_map_proposed, null, true)
                 }
             }
             // 변경된 경우 채팅 컴포넌트 조정 끝
 
+            // 슬라이더 변경이 거부된 경우 앵커 복원(기존 위치 앵커값 or 기본값) 시작
+            if(!is_ok){
+                if(anchor_map_previous){
+                    $.uriAnchor.setAnchor(anchor_map_previous, null, true)
+                    stateMap.anchor_map = anchor_map_previous
+                } else {
+                    delete anchor_map_proposed.chat
+                    $.uriAnchor.setAnchor(anchor_map_proposed, null, true)
+                }
+            }
+            // 슬라이더 변경이 거부된 경우 앵커 복원 끝
+
             return false
         }
 
-        /**
-         * 앵커의 chat 파라미터만 변경
+        /* 앵커의 chat 파라미터만 변경
          * @return {boolean} false
          * - 효과:
          * - jQuery 기본 동작을 수행하지 않도록 한다(링크 따라가기, 텍스트 선택 등) == event.preventDefault()
          * - jQuery 가 부모 DOM 엘리먼트에서 같은 이벤트를 트리거(버블링) 하지 않도록 한다 == event.stopPropagation()
          * - 해당 이벤트 핸들러 실행을 종료한다. 해당 핸들러가 다른 핸들러에도 연결되어 있다면 순서상 다음 핸들러를 실행한다 == event.stopImmediatePropagation()
-         */
+         * @function 이벤트 핸들러
+         * @see p.141 생성, p.189 제거
         onClickChat = function () {
             changeAnchorPart({
                 chat: (stateMap.is_chat_retracted ? 'open' : 'closed')
             })
             return false
         }
+        */
+        // --- /이벤트 핸들러 ---
 
+        // --- 콜백 ---
         /**
-         * setChatAnchor API. 앵커의 채팅 컴포넌트를 변경
+         * 앵커의 채팅 컴포넌트를 변경
          * @example setChatAnchor('closed')
          * @param position_type 'closed' 또는 'opened' 중 하나
-         * @function 변경 가능한 경우 URI 앵커 파라미터 'chat' 을 요청한 값으로 변경
+         * @function 콜백 - 변경 가능한 경우 'chat'(URI 앵커 파라미터) 을 요청한 값으로 변경
+         * - 이 콜백은 안전하게 URI 변경을 요청하기 위해 Chat 모듈로 제공한다
          * @return true 요청한 앵커 부분을 업데이트 한 경우, false 요청한 앵커 부분을 업데이트하지 못한 경우
+         * @see p.189 생성
          */
-        // setChatAnchor API
+        setChatAnchor = function (position_type) {
+            return changeAnchorPart({
+                chat: position_type
+            })
+        }
+        // --- /콜백 ---
 
         /**
          * 다음 URI 로도 접근 가능
          * URI: http://localhost:63342/singlepage/spa.html#!chat=profile:on:uid,suzie|status,green
-         *
+         * @see p.143 생성
          */
         tempURI = function () {
             const tempAnchorMap= {
@@ -284,38 +311,51 @@ spa.shell = (function () {
 
         // --- public 메서드(외부 노출) ---
         /**
-         * 모듈 초기화
+         * 모듈 초기화. 셸이 사용자에게 기능을 제공하게끔 지시
+         * @example spa.shell.initModule( $('#app_div_id') )
+         * @param $container 단일 DOM 컨테이너를 나타내는 제이쿼리 컬렉션
+         * @desc
          * - URI 스키마를 대상으로 유효성을 검사하게끔 uriAnchor 를 설정
          * - URI 앵커 변경 이벤트 처리
          * - HTML 을 로드한 후 jQuery 컬렉션 객체를 매핑
          * - 채팅 슬라이더 초기화 및 클릭 핸들러 바인딩
-         * @param $container
-         * @desc
-         * @function public 메서드: 외부 노출
+         * @function public 메서드: 
+         * - $container 를 UI 의 셸로 채우고 기능 모듈 초기화 및 재설정
+         * - 셸에서는 URI 앵커 및 쿠키 관리 같은 브라우저 문제도 책임진다
          */
         initModule = function ($container) {
-            // stateMap 정의는 $(window).bind.trigger 보다 먼저 이뤄져야 한다.
             // HTML 을 로드한 후 jQuery 컬렉션 객체를 매핑한다
+            // 주의: stateMap 정의는 $(window).bind.trigger 보다 먼저 이뤄져야 한다.
             stateMap.$container = $container
             $container.html(configMap.main_html)
             setJqueryMap()
 
-            // 채팅 슬라이더 초기화 및 클릭 핸들러 바인딩
-            stateMap.is_chat_retracted = true
-            jqueryMap.$chat
-                .attr('title', configMap.chat_retracted_title) //jQuery 를 포함시켜야 attr 메서드를 사용할 수 있다
-                .click(onClickChat)
+            // p.190 제거- 채팅 슬라이더 초기화 및 클릭 핸들러 바인딩
+            // stateMap.is_chat_retracted = true
+            // jqueryMap.$chat
+            //     .attr('title', configMap.chat_retracted_title) //jQuery 를 포함시켜야 attr 메서드를 사용할 수 있다
+            //     .click(onClickChat)
 
             // URI 스키마를 대상으로 유효성을 검사하게끔 uriAnchor 를 설정한다
             $.uriAnchor.configModule({
                 schema_map : configMap.anchor_schema_map
             })
 
-            // tempURI()
+            // tempURI() - 사용하지 않는 기능. 다른 URI 로 접근할 경우
 
-            // 기능 모듈을 설정 및 초기화
-            spa.chat.configModule({})
-            spa.chat.initModule(jqueryMap.$chat)
+            /**
+             * 기능 모듈을 설정 및 초기화
+             * @desc 채팅 슬라이더 클릭 바인딩을 Chat 설정 및 초기화 코드로 변경
+             * - spa.model.chat: Chat 초기화. Chat 에서 채팅 슬라이더를 첨부할 컨테이너를 제공한다(기존: 셸에서 사용할 컨테이너를 제공)
+             * - 모듈과 모듈 작성자를 신뢰할 수 있을 때 좋은 정리 기법
+             * @see p.190 추가
+             */
+            spa.chat.configModule({
+                set_chat_anchor : setChatAnchor,
+                chat_model      : spa.model.chat,
+                people_model    : spa.model.people
+            })
+            spa.chat.initModule(jqueryMap.$container)
 
             /**
              * URI 앵커 변경 이벤트 처리
