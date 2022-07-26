@@ -75,8 +75,8 @@ spa.chat = (function () {
      * @return {number} px
      */
     getEmSize = function (elem) {
-        elem = elem ?? document.querySelector('spa-chat')
-    
+        // elem = elem ?? document.querySelector('spa-chat')
+
         return Number(
             getComputedStyle(elem, "").fontSize.match(/\d*\.?\d*/)[0]
         )
@@ -91,7 +91,8 @@ spa.chat = (function () {
      */
     setJqueryMap = function () {
         const $append_target = stateMap.$append_target
-        const $slider = $append_target.find('spa-chat')
+        const $slider = $append_target.find('.spa-chat')
+        // 이틀 헤멘 에러 history- . 안 찍어서- const $slider = $append_target.find('spa-chat')
         // let $container = stateMap.$container
 
         jqueryMap = {
@@ -234,8 +235,8 @@ spa.chat = (function () {
     initModule = function ($append_target) {
         $append_target.append(configMap.main_html)
         stateMap.$append_target = $append_target
-        setJqueryMap()
-        setPxSizes()
+        setJqueryMap() //순서1
+        setPxSizes() //순서2
 
         // 기본 제목 및 상태로 채팅 슬라이더 초기화
         jqueryMap.$toggle.prop('title', configMap.slider_closed_title)
