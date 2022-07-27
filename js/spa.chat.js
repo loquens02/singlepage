@@ -45,7 +45,10 @@ spa.chat = (function () {
         },
         slider_open_time: 250,
         slider_close_time: 250,
-        slider_opened_em: 16,
+        slider_opened_em: 18,
+        slider_opened_min_em: 10,
+        /*창의 최소 높이. 창이 이 값보다 작다면 슬라이더를 최소 높이로 설정*/
+        window_height_min_em: 20,
         slider_closed_em: 2,
         slider_opened_title: 'Click to close',
         slider_closed_title: 'Click to open',
@@ -66,6 +69,7 @@ spa.chat = (function () {
     let jqueryMap = {}
     let setJqueryMap, configModule, initModule
     let getEmSize, setPxSizes, setSliderPosition, onClickToggle
+    let removeSlider, handleResize
     // --- /모듈 스코프 변수---
 
     // --- 유틸리티 메서드 ---
@@ -114,7 +118,10 @@ spa.chat = (function () {
      */
     setPxSizes = function () {
         const px_per_em = getEmSize(jqueryMap.$slider.get(0))
-        const opened_height_em = configMap.slider_opened_em
+        const window_height_em = Math.floor(($(window).height() / px_per_em) + 0.5) // 창 높이 단위 em
+        const opened_height_em = window_height_em > configMap.window_height_min_em
+                                ? configMap.slider_opened_em : configMap.slider_opened_min_em
+
         stateMap.px_per_em = px_per_em
         stateMap.slider_closed_px = configMap.slider_closed_em * px_per_em
         stateMap.slider_opened_px = opened_height_em * px_per_em
@@ -226,6 +233,56 @@ spa.chat = (function () {
     }
 
     /**
+     * remove chatSlider DOM element
+     * - restore the state of the chatSlider to its initial state
+     * - detach callback and pointer of other data
+     * - 인증 기능이 있다면 로그아웃할 때 채팅 슬라이더를 완전히 제거해야 한다
+     * @return true
+     * @function public 메서드. Chat 이 첨부된 DOM 컨테이너를 제거하고 초기화와 설정을 순서대로 되돌린다.
+     */
+    removeSlider = function () {
+        // restore the state of the chatSlider to its initial state
+        // remove DOM container. 컨테이너 제거 시 이벤트 바인딩도 함께 제거된다
+        if(jqueryMap.$slider) {
+            jqueryMap.$slider.remove()
+            jqueryMap = {}
+        }
+        stateMap.$append_target = null
+        stateMap.position_type = 'closed'
+
+        // 키 설정 초기화
+        configMap.chat_model = null
+        configMap.people_model = null
+        configMap.set_chat_anchor = null
+
+        return true
+    }
+
+    /**
+     * Adapt the presentation provided by this module as needed when the window resize event occurs
+     * - 창 리사이즈 이벤트가 일어나면 필요에 따라 이 모듈에서 제공하는 프레젠테이션을 조정
+     * @return false When resizing is unnecessary
+     * @return true When resizing is necessary
+     * @function public 메서드. 창 높이나 너비가 최소 크기 미만이면 줄어든 창 크기에 맞춰 채팅 슬라이더 크기 변경
+     * @see p.198 생성
+     */
+    handleResize = function () {
+        // 슬라이더 컨테이너가 없으면 아무 것도 하지 않는다
+        if( !jqueryMap.$slider ) {
+            return false
+        }
+
+        setPxSizes()
+        // opened 일 경우, 창 리사이즈 이벤트가 일어나는 동안 setPxSize 에서 계산한 값으로 슬라이더 높이 재설정
+        if(stateMap.position_type === 'opened') {
+            jqueryMap.$slider.css({
+                height: stateMap.slider_opened_px // copilot: String(stateMap.slider_opened_em) + 'em'
+            })
+        }
+        return true
+    }
+
+    /**
      * initModule API. Chat 기능 모듈이 사용자에게 기능을 제공하게끔 지시
      * @example spa.chat.initModule( $('#div_id') )
      * @param $append_target (예시: $('#div_id') ) 단일 DOM 컨테이너를 나타내는 제이쿼리 컬렉션
@@ -259,10 +316,14 @@ spa.chat = (function () {
         return true
     }*/
 
-    return { // 모듈 메서드를 외부로 노출한다. configModule, initModule 은 거의 모든 모듈에서 사용하는 표준 메서드
+    // 모듈 메서드를 외부로 노출한다. configModule, initModule 은 거의 모든 모듈에서 사용하는 표준 메서드
+    // example: spa.chat.메서드
+    return {
         setSliderPosition: setSliderPosition,
         configModule: configModule,
-        initModule: initModule
+        initModule: initModule,
+        removeSlider: removeSlider,
+        handleResize: handleResize
     }
     // --- /public 메서드 ---
 })()
