@@ -1,7 +1,7 @@
 /*
 spa.css 루트 네임스페이스 스타일
 */
-/** (브라우저 기본설정은 못 믿으니)재설정 시작 시 */
+/** (브라우저 기본설정은 못 믿으니)재설정*/
 * {
     margin:     0;
     padding:    0;
@@ -9,13 +9,15 @@ spa.css 루트 네임스페이스 스타일
     -moz-box-sizing:    border-box;
     box-sizing:         border-box;
 }
-h1,h2,h3,h4,h5,h6,p { margin-bottom: 10px;}
+/*px 대신 상대 단위 point 로 변경*/
+h1,h2,h3,h4,h5,h6,p { margin-bottom: 6pt;}
 ol,ul,dl {list-style-position: inside;}
-/** 재설정 끝*/
+/** /재설정*/
 
-/** (브라우저 기본설정은 못 믿으니)표준 선택자 조정 시작*/
+/** (브라우저 기본설정은 못 믿으니)표준 선택자 조정*/
 body{
-    font: 13px 'Trebuchet MS', Verdana, Helvetica, Arial, sans-serif;
+    /*px 대신 상대 단위 point 로 변경*/
+    font: 10pt 'Trebuchet MS', Verdana, Helvetica, Arial, sans-serif;
     color: #444;
     background-color: #888;
 }
@@ -26,24 +28,26 @@ strong{
     font-weight: 800;
     color: #000;
 }
-/** 표준 선택자 조정 끝*/
+/** /표준 선택자 조정*/
 
-/** 네임스페이스 선택자 시작*/
+/** 네임스페이스 선택자*/
 #spa {
     position: absolute;
-    top: 8px;
-    left: 8px;
-    bottom: 8px;
-    right: 8px;
-    min-height: 500px;
-    min-width: 500px;
+    /*8px 오프셋 제거 => div 가 창과 같은 크기가 되도록*/
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: #fff;
+    /*div 의 최소 너비 및 높이를 기존 500px 대비 크게 줄이기*/
+    min-height: 15em;
+    min-width: 35em;
     overflow: hidden;
-    background-color: #fff;
-    border-radius: 0 8px 0 8px;
+    /*border-radius: 0 8px 0 8px;*/
 }
-/** 네임스페이스 선택자 끝*/
+/** /네임스페이스 선택자*/
 
-/** 유틸리티 선택자 시작*/
+/** 유틸리티 선택자*/
 .spa-x-select {}
 .spa-x-clearfloat{
     height:0 !important;
@@ -51,5 +55,5 @@ strong{
     visibility: hidden !important;
     clear: both !important;
 }
-/** 유틸리티 선택자 끝*/
+/** /유틸리티 선택자*/
 

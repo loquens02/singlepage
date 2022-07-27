@@ -32,7 +32,9 @@ spa.shell = (function () {
                 + '</div>'
                 + '<div class="spa-shell-foot"></div>'
                 + '<div class="spa-shell-chat"></div>'
-                + '<div class="spa-shell-modal"></div>'
+                + '<div class="spa-shell-modal"></div>',
+
+            resize_interval: 200, // 창 크기 조절 주기. 200ms 간격으로 resize event 를 고려하게끔 지정
             
             // 요구1-1. 슬라이더가 움직이는 속도와 높이를 개발자가 설정할 수 있다
             // chat_extend_time: 250, // 채팅 연장 시간. 작을수록 빠름
@@ -43,14 +45,15 @@ spa.shell = (function () {
             // chat_retracted_title: 'Click to extend', // 사용자 툴팁. 클릭하면 열립니다
         }
         const stateMap = {
-            // $container: null,
+            $container: null,
             anchor_map: {}, // 현재 앵커 값을 모듈 상태 맵인 stateMap, anchor_map 에 저장한다
+            resize_idto: undefined, // resize time out id
             // is_chat_retracted: true, // 채팅 축소 상태. toggleChat() 함수를 호출하면 반대로 바뀜
         } // 모듈 사이에 공유하는 동적 정보
 
         let jqueryMap = {} // jQuery 컬렉션 객체 캐싱
         let setJqueryMap, initModule, setChatAnchor //, onClickChat, toggleChat
-        let copyAnchorMap, changeAnchorPart, onHashchange
+        let copyAnchorMap, changeAnchorPart, onHashchange, onResize
         // --- /모듈 스코프 변수 ---
 
         // --- 유틸리티 메서드 ---
@@ -257,6 +260,22 @@ spa.shell = (function () {
             return false
         }
 
+        onResize = function () {
+            // 현재 실행 중인 리사이즈 타이머가 없을 때만 onResize 로직을 실행한다
+            if (stateMap.resize_idto) {
+                return true
+            }
+            spa.chat.handleResize()
+            // timeout 함수는 자체 타임아웃 ID를 제거하므로
+            // resize 가 일어나는 동안 200ms 마다 stateMap.resize_id = undefined 가 되고, 전체 onResize 로직이 다시 실행된다
+            stateMap.resize_idto = setTimeout(
+                function () {stateMap.resize_idto = undefined},
+                configMap.resize_interval
+            )
+            // jQuery 에서 preventDefault() 나 stopPropagation() 을 호출하지 않게 window.resize 이벤트 핸들러에서 true 반환
+            return true
+        }
+
         /* 앵커의 chat 파라미터만 변경
          * @return {boolean} false
          * - 효과:
@@ -364,6 +383,7 @@ spa.shell = (function () {
              * - hashchange 이벤트 핸들러를 바인딩하고, 초기 로드 시점에 모듈에서 즐겨찾기 여부를 판단할 수 있게 바로 트리거한다.
              */
             $(window)
+                .bind('resize', onResize) // window.resize 이벤트 핸들러 바인딩
                 .bind('hashchange', onHashchange)
                 .trigger('hashchange')
         }
