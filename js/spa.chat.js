@@ -68,23 +68,23 @@ spa.chat = (function () {
     }
     let jqueryMap = {}
     let setJqueryMap, configModule, initModule
-    let getEmSize, setPxSizes, setSliderPosition, onClickToggle
+    let setPxSizes, setSliderPosition, onClickToggle //,getEmSize
     let removeSlider, handleResize
     // --- /모듈 스코프 변수---
 
     // --- 유틸리티 메서드 ---
-    /**
-     * em 표시 단위를 px로 변환. jQuery 의 크기 단위를 사용할 수 있도록
+     /* em 표시 단위를 px로 변환. jQuery 의 크기 단위를 사용할 수 있도록
      * @param elem em
      * @return {number} px
-     */
-    getEmSize = function (elem) {
-        // elem = elem ?? document.querySelector('spa-chat')
+     *
+     * spa.util_b 와 중복
 
+    getEmSize = function (elem) {
         return Number(
-            getComputedStyle(elem, "").fontSize.match(/\d*\.?\d*/)[0]
+            getComputedStyle(elem, '').fontSize.match(/\d*\.?\d*!/)[0]
         )
-    }
+    }*/
+
     // --- /유틸리티 메서드 ---
 
     // --- DOM 메서드 ---
@@ -117,7 +117,7 @@ spa.chat = (function () {
      * @function DOM 메서드
      */
     setPxSizes = function () {
-        const px_per_em = getEmSize(jqueryMap.$slider.get(0))
+        const px_per_em = spa.util_b.getEmSize(jqueryMap.$slider.get(0))
         const window_height_em = Math.floor(($(window).height() / px_per_em) + 0.5) // 창 높이 단위 em
         const opened_height_em = window_height_em > configMap.window_height_min_em
                                 ? configMap.slider_opened_em : configMap.slider_opened_min_em
