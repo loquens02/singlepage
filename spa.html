@@ -8,24 +8,32 @@ spa 브라우저 문서
     <!--  IE9 이상의 표준 지원  -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta content="text/html" charset="UTF-8">
-    <title>SPA Chapter 4</title>
-    <!--    서드파티 스타일 시트 -->
+    <title>SPA Chapter 5-6</title>
+    <!--  third-party 스타일 시트 -->
 
     <!--  my style sheet  -->
     <link rel="stylesheet" href="css/spa.css" type="text/css"/> <!-- 순서: CSS 가 JS 보다 먼저 오면 된다-->
+    <link rel="stylesheet" href="css/spa.avatar.css" type="text/css"/>
     <link rel="stylesheet" href="css/spa.chat.css" type="text/css"/> <!-- 순서: CSS 끼리는 tree 편의 정도만 맞추기-->
     <link rel="stylesheet" href="css/spa.shell.css" type="text/css"/>
 
-    <!--    서드파티 JS-->
+    <!--    third-party JS-->
+    <script src="js/lib/taffydb.js"></script> <!-- 순서0: 클라이언트 측 DB 추가 -->
     <script src="js/jq/jquery-3.6.0.js"></script> <!-- 순서1: 상위 모듈-->
     <script src="js/jq/jquery.uriAnchor-1.3.3.js"></script> <!--URI 앵커 컴포넌트 관리-->
+    <script src="js/jq/jquery.event.gevent-1.1.2.js"></script> <!--global event subscription-->
+    <script src="js/jq/jquery.event.ue-1.3.js"></script> <!--mouse unified event-->
 
     <!--    my JS-->
     <script src="js/spa.js"></script> <!-- 순서1: 상위 모듈-->
     <script src="js/spa.util.js"></script><!-- 순서2: 모든 모듈에서 사용하는 공통 유틸리티 모듈-->
+    <script src="js/spa.data.js"></script><!-- data -->
+    <script src="js/spa.fake.js"></script><!-- fake data -->
     <script src="js/spa.model.js"></script> <!--브라우저 모델-->
+    <script src="js/spa.util_b.js"></script> <!--브라우저 유틸리티-->
     <script src="js/spa.shell.js"></script>
     <script src="js/spa.chat.js"></script> <!-- 순서N: 셸을 로드한 다음 기능 모듈을 로드-->
+    <script src="js/spa.avatar.js"></script> <!-- 아바타 기능 -->
     <script>
         $(function () { spa.initModule( $('#spa')); }); // Dom 준비되면 app 초기화
     </script>
