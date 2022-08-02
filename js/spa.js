@@ -12,8 +12,10 @@ white:  true
 
 /*global $, spa */
 const spa = (function () {
+    'use strict';
     const initModule = function ($container) {
-        spa.shell.initModule($container)
+        spa.model.initModule() // 순서1. 모델을 셸보다 먼저 초기화
+        spa.shell.initModule($container) // 순서2
     }
     return { initModule: initModule}
 })()
