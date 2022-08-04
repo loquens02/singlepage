@@ -167,17 +167,19 @@ spa.model = (function () {
                 css_map: {top: 25, left: 25, 'background-color': '#8f8'},
                 name: name
             })
+
+            // 백엔드에서 user update 메시지를 발송할 때, 로그인을 마칠 수 있게 콜백 등록
+            sio.on('user update', completeLogin)
+
+            // 사용자 상세 정보와 함께 adduser 메시지를 백엔드로 전송. 사용자 추가 행동은 로그인 행동과 같은 행동이다(?)
+            sio.emit('adduser', {
+                cid: stateMap.user.cid,
+                css_map: stateMap.user.css_map,
+                name: stateMap.user.name
+            })
         }
 
-        // 백엔드에서 user update 메시지를 발송할 때, 로그인을 마칠 수 있게 콜백 등록
-        sio.on('user update', completeLogin)
 
-        // 사용자 상세 정보와 함께 adduser 메시지를 백엔드로 전송. 사용자 추가 행동은 로그인 행동과 같은 행동이다(?)
-        sio.emit('adduser', {
-          cid: stateMap.user.cid,
-          css_map: stateMap.user.css_map,
-            name: stateMap.user.name
-        })
 
         /**
          * @event spa-logout 로그아웃 절차가 완료될 때 발행된다. 이때 이전 사용자 객체가 데이터로 제공된다.
