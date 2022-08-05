@@ -16,6 +16,8 @@ const spa = (function () {
     const initModule = function ($container) {
         spa.model.initModule() // 순서1. 모델을 셸보다 먼저 초기화
         spa.shell.initModule($container) // 순서2
+
+        spa.model.test.logInOutTest() // TODO release 전에 꼭 주석하기
     }
     return { initModule: initModule}
 })()
