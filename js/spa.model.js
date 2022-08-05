@@ -168,8 +168,9 @@ spa.model = (function () {
                 name: name
             })
 
-            // 백엔드에서 user update 메시지를 발송할 때, 로그인을 마칠 수 있게 콜백 등록
-            sio.on('user update', completeLogin)
+            // 백엔드에서 userupdate 메시지를 발송할 때, 로그인을 마칠 수 있게 콜백 등록
+            // Solution: 띄어쓰기를 하면 안 된다. 주석에 user update + 무지성 copilot
+            sio.on('userupdate', completeLogin);
 
             // 사용자 상세 정보와 함께 adduser 메시지를 백엔드로 전송. 사용자 추가 행동은 로그인 행동과 같은 행동이다(?)
             sio.emit('adduser', {
@@ -206,6 +207,8 @@ spa.model = (function () {
         }
     })()
 
+
+
     initModule = function () {
         let i, people_list, person_map
         // 익명 사용자 초기화
@@ -229,6 +232,7 @@ spa.model = (function () {
             }
         }
     }
+
 
     return {
         initModule: initModule,
