@@ -10,6 +10,7 @@ white:  true
  */
 /*global $, spa */
 spa.shell = (function () {
+        'use strict';
         // --- 모듈 스코프 변수 ---
         /**
          * 정적 설정값
@@ -18,11 +19,16 @@ spa.shell = (function () {
          */
         const configMap = {
             anchor_schema_map: { // uriAnchor 에서 유효성 검사에 사용할 맵 정의
-                chat: { opened: true, closed: true}
+                chat: {opened: true, closed: true}
             },
             main_html: String()
                 + '<div class="spa-shell-head">'
                 + '  <div class="spa-shell-head-logo"></div>'
+                + '    <div class="spa-shell-head-logo2">'
+                + '        <h1>SPA</h1>'
+                + '        <p>javascript end to end</p>'
+                + '    </div>'
+                + '    <div class="spa-shell-head-acct"></div>'
                 + '  <div class="spa-shell-head-acct"></div>'
                 + '  <div class="spa-shell-head-search"></div>'
                 + '</div>'
@@ -35,7 +41,7 @@ spa.shell = (function () {
                 + '<div class="spa-shell-modal"></div>',
 
             resize_interval: 200, // 창 크기 조절 주기. 200ms 간격으로 resize event 를 고려하게끔 지정
-            
+
             // 요구1-1. 슬라이더가 움직이는 속도와 높이를 개발자가 설정할 수 있다
             // chat_extend_time: 250, // 채팅 연장 시간. 작을수록 빠름
             // chat_retract_time: 300, // 채팅 축소 시간
@@ -54,6 +60,7 @@ spa.shell = (function () {
         let jqueryMap = {} // jQuery 컬렉션 객체 캐싱
         let setJqueryMap, initModule, setChatAnchor //, onClickChat, toggleChat
         let copyAnchorMap, changeAnchorPart, onHashchange, onResize
+        let onTapAcct, onLogin, onLogout
         // --- /모듈 스코프 변수 ---
 
         // --- 유틸리티 메서드 ---
@@ -62,7 +69,7 @@ spa.shell = (function () {
          * @returns {stateMap.anchor_map} jQuery.extend 유틸리티로 객체 복사. 그냥 넘기면 JS는 참조값만 전달하므로.
          * @function 유틸리티 메서드: 페이지 엘리먼트와 상호작용하지 않는 함수
          */
-        copyAnchorMap = function (){
+        copyAnchorMap = function () {
             return $.extend(true, {}, stateMap.anchor_map)
         }
         // --- /유틸리티 메서드 ---
@@ -75,7 +82,9 @@ spa.shell = (function () {
         setJqueryMap = function () { //
             const $container = stateMap.$container
             jqueryMap = {
-                $container: $container
+                $container: $container,
+                $acct: $container.find('.spa-shell-head-acct'), // jQuery 캐시 맵에 추가
+                $nav: $container.find('.spa-shell-main-nav'),
                 // $chat: $container.find('.spa-shell-chat') // 채팅 슬라이더 jQuery 컬렉션 캐싱
             }
         }
@@ -93,41 +102,39 @@ spa.shell = (function () {
          * - uriAnchor 를 활용해  URI 변경을 시도한다.
          * @function DOM 메서드: 페이지 엘리먼트를 생성하고 조작하는 함수
          */
-        changeAnchorPart = function (arg_map){
-            const anchor_map_revise= copyAnchorMap()
+        changeAnchorPart = function (arg_map) {
+            const anchor_map_revise = copyAnchorMap()
             let bool_return = true
             let key_name, key_name_dep
 
             // 변경 사항을 앵커 맵으로 합치는 작업 시작
             KEYVAL:
-            for (key_name in arg_map) {
-                if (arg_map.hasOwnProperty(key_name)) {
-                    // 반복 과정 중 의존적 키는 건너뜀
-                    if(key_name.indexOf('_') === 0){
-                        continue KEYVAL // IDE warning: 불필요한 라벨이 있는 continue 문
-                    }
+                for (key_name in arg_map) {
+                    if (arg_map.hasOwnProperty(key_name)) {
+                        // 반복 과정 중 의존적 키는 건너뜀
+                        if (key_name.indexOf('_') === 0) {
+                            continue KEYVAL // IDE warning: 불필요한 라벨이 있는 continue 문
+                        }
 
-                    // 독립적 키 값 업데이트
-                    anchor_map_revise[key_name] = arg_map[key_name]
+                        // 독립적 키 값 업데이트
+                        anchor_map_revise[key_name] = arg_map[key_name]
 
-                    // 대응되는 의존적 키를 업데이트
-                    key_name_dep = '_' + key_name
-                    if(arg_map[key_name_dep]){
-                        anchor_map_revise[key_name_dep] =  arg_map[key_name_dep]
-                    }
-                    else {
-                        delete anchor_map_revise[key_name_dep]
-                        delete anchor_map_revise['_s' + key_name_dep]
+                        // 대응되는 의존적 키를 업데이트
+                        key_name_dep = '_' + key_name
+                        if (arg_map[key_name_dep]) {
+                            anchor_map_revise[key_name_dep] = arg_map[key_name_dep]
+                        } else {
+                            delete anchor_map_revise[key_name_dep]
+                            delete anchor_map_revise['_s' + key_name_dep]
+                        }
                     }
                 }
-            }
             // 변경 사항을 앵커 맵으로 합치는 작업 끝
 
             // URI 업데이트 시도. 실패하면 앵커 컴포넌트를 기존 상태로 복원한다.
             try {
                 $.uriAnchor.setAnchor(anchor_map_revise)
-            }
-            catch (error) {
+            } catch (error) {
                 // URI 를 기존 상태로 대체. 스키마에 부합하지 않으면 앵커를 설정하지 않는다
                 $.uriAnchor.setAnchor(stateMap.anchor_map, null, true)
                 bool_return = false
@@ -201,15 +208,14 @@ spa.shell = (function () {
          */
         onHashchange = function () {
             const anchor_map_previous = copyAnchorMap()
-            let is_ok= true
+            let is_ok = true
             let anchor_map_proposed
             let _s_chat_previous, _s_chat_proposed, s_chat_proposed
 
             // 앵커 파싱 시도
             try {
                 anchor_map_proposed = $.uriAnchor.makeAnchorMap()
-            }
-            catch (e) {
+            } catch (e) {
                 $.uriAnchor.setAnchor(anchor_map_previous, null, true)
                 return false
             }
@@ -246,8 +252,8 @@ spa.shell = (function () {
             // 변경된 경우 채팅 컴포넌트 조정 끝
 
             // 슬라이더 변경이 거부된 경우 앵커 복원(기존 위치 앵커값 or 기본값) 시작
-            if(!is_ok){
-                if(anchor_map_previous){
+            if (!is_ok) {
+                if (anchor_map_previous) {
                     $.uriAnchor.setAnchor(anchor_map_previous, null, true)
                     stateMap.anchor_map = anchor_map_previous
                 } else {
@@ -269,7 +275,9 @@ spa.shell = (function () {
             // timeout 함수는 자체 타임아웃 ID를 제거하므로
             // resize 가 일어나는 동안 200ms 마다 stateMap.resize_id = undefined 가 되고, 전체 onResize 로직이 다시 실행된다
             stateMap.resize_idto = setTimeout(
-                function () {stateMap.resize_idto = undefined},
+                function () {
+                    stateMap.resize_idto = undefined
+                },
                 configMap.resize_interval
             )
             // jQuery 에서 preventDefault() 나 stopPropagation() 을 호출하지 않게 window.resize 이벤트 핸들러에서 true 반환
@@ -291,6 +299,47 @@ spa.shell = (function () {
             return false
         }
         */
+
+        /**
+         * '사용자 영역'을 클릭했을 때 행동 정의
+         * - 로그인 하지 않았다면 사용자 이름을 입력하라는 메시지 표시
+         * - 로그인 했다면 spa.model.people.logout() 호출
+         * @param event
+         * @function 이벤트 핸들러
+         */
+        onTapAcct = function (event) {
+            let acct_text, user_name
+            const user= spa.model.people.get_user()
+
+            if(user.get_is_anonymous()){
+                user_name = prompt('Please sign-in') // 있으면 string, 없으면 default 혹은 null
+                spa.model.people.login(user_name)
+                jqueryMap.$acct.text('...processing...')
+            }
+            else {
+                spa.model.people.logout()
+            }
+            return false
+        }
+
+        /**
+         * 로그인 시 사용자 영역에 사용자 이름을 표시한다
+         * @param event
+         * @param login_user 사용자 정보는 spa-login 이벤트에서 전달하는 login_user 객체를 통해 받는다
+         * @function 이벤트 핸들러
+         */
+        onLogin = function (event, login_user) {
+            jqueryMap.$acct.text(login_user.name)
+        }
+        /**
+         * 로그아웃 시 사용자 영역에 'Please sign-in' 을 표시한다
+         * @param event
+         * @param logout_user
+         * @function 이벤트 핸들러
+         */
+        onLogout = function (event, logout_user) {
+            jqueryMap.$acct.text('Please sign-in')
+        }
         // --- /이벤트 핸들러 ---
 
         // --- 콜백 ---
@@ -315,10 +364,10 @@ spa.shell = (function () {
          * URI: http://localhost:63342/singlepage/spa.html#!chat=profile:on:uid,suzie|status,green
          * @see p.143 생성
          */
-        tempURI = function () {
-            const tempAnchorMap= {
+        const tempURI = function () {
+            const tempAnchorMap = {
                 profile: 'on',
-                _profile:{
+                _profile: {
                     uid: 'suzie',
                     status: 'green'
                 }
@@ -338,7 +387,7 @@ spa.shell = (function () {
          * - URI 앵커 변경 이벤트 처리
          * - HTML 을 로드한 후 jQuery 컬렉션 객체를 매핑
          * - 채팅 슬라이더 초기화 및 클릭 핸들러 바인딩
-         * @function public 메서드: 
+         * @function public 메서드:
          * - $container 를 UI 의 셸로 채우고 기능 모듈 초기화 및 재설정
          * - 셸에서는 URI 앵커 및 쿠키 관리 같은 브라우저 문제도 책임진다
          */
@@ -357,7 +406,7 @@ spa.shell = (function () {
 
             // URI 스키마를 대상으로 유효성을 검사하게끔 uriAnchor 를 설정한다
             $.uriAnchor.configModule({
-                schema_map : configMap.anchor_schema_map
+                schema_map: configMap.anchor_schema_map
             })
 
             // tempURI() - 사용하지 않는 기능. 다른 URI 로 접근할 경우
@@ -370,9 +419,9 @@ spa.shell = (function () {
              * @see p.190 추가
              */
             spa.chat.configModule({
-                set_chat_anchor : setChatAnchor,
-                chat_model      : spa.model.chat,
-                people_model    : spa.model.people
+                set_chat_anchor: setChatAnchor,
+                chat_model: spa.model.chat,
+                people_model: spa.model.people
             })
             spa.chat.initModule(jqueryMap.$container)
 
@@ -386,6 +435,18 @@ spa.shell = (function () {
                 .bind('resize', onResize) // window.resize 이벤트 핸들러 바인딩
                 .bind('hashchange', onHashchange)
                 .trigger('hashchange')
+
+            // $container jQuery 컬렉션으로 하여금 spa-login 및 spa-logout 이 이벤트를 구독하면서
+            // onLogin 및 onLogout 이벤트 핸들러를 동록하게 한다
+            // 이제 test 아니고 기능에 포함하도록 함
+            $.gevent.subscribe($container, 'spa-login', onLogin)
+            $.gevent.subscribe($container, 'spa-logout', onLogout);
+
+            // utap 이 의미 불명이라 usertap 로 변경했더니 event 발생이 안 된다. jquery event 예약어.
+            // 단일 클릭으로는 무반응. 더블 클릭을 해야만 반응이 있다.
+            jqueryMap.$acct
+                .text('Please sign in')
+                .bind('utap', onTapAcct)
         }
 
         return {initModule: initModule}
