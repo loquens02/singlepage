@@ -1,5 +1,6 @@
 # jquery lib error,warning - https://www.w3schools.com/git/git_ignore.asp?remote=github
 #js/jq/ 추가를 안 하면 동작을 안 하겠지
+syntax/temp*
 
 # IDE
 vcs.xml
