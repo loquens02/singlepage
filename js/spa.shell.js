@@ -446,7 +446,8 @@ spa.shell = (function () {
             // 단일 클릭으로는 무반응. 더블 클릭을 해야만 반응이 있다.
             jqueryMap.$acct
                 .text('Please sign in')
-                .bind('utap', onTapAcct)
+                // .bind('utap', onTapAcct) // 더블 클릭. gevent 설명과 달리 2번 클릭해야 반응
+                .bind('click', onTapAcct) // 단일 클릭.
         }
 
         return {initModule: initModule}
