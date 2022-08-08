@@ -1,9 +1,11 @@
 /*명명 spa-shell- : 이 클래스를 spa.shell.js 에서 관리
 외부 모듈과 네임스페이스가 충돌하지 않음
 html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하는 지 알 수 있음
+
+제거: .spa-shell-head-search p.249
 */
 .spa-shell-head, .spa-shell-head-logo, .spa-shell-head-acct,
-.spa-shell-head-search, .spa-shell-main, .spa-shell-main-nav,
+.spa-shell-main, .spa-shell-main-nav, /*.spa-shell-head-search*/
 .spa-shell-main-content, .spa-shell-foot, /*.spa-shell-chat,*/ .spa-shell-modal {
     position: absolute;
 }
@@ -17,18 +19,35 @@ html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하�
 
 .spa-shell-head-logo {
     top: 4px;
-    left: 4px;
+    left: 8px; /* 4->8. logo 가 모서리에서 멀어지게끔*/
     width: 128px;
     height: 32px;
-    background: orange;
+}
+/*logo div 안에 있는 헤더*/
+.spa-shell-head-logo h1{
+    font: 800 22px/22px Arial, Helvetica, sans-serif;
+    margin: 0;
+}
+/*logo div 안에 있는 단락*/
+.spa-shell-head-logo p{
+    font: 800 10px/10px Arial, Helvetica, sans-serif;
+    margin: 0;
 }
 
+/*사용자 영역 텍스트를 좀더 읽기 쉽도록 변경*/
 .spa-shell-head-acct {
     top: 4px;
-    right: 64px;
-    width: 248px;
+    right: 0;
+    width: 210px;
     height: 32px;
-    background: blue;
+    line-height: 32px;
+    background: #888;
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+    /*넘치면 말줄임표 ... https://developer.mozilla.org/en-US/docs/Web/CSS/text-overflow*/
+    text-overflow: ellipsis;
 }
 
 .spa-shell-main {
@@ -43,10 +62,11 @@ html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하�
     top: 0;
     bottom: 0;
 }
-
+/*nav 가 main-content 위에 오도록*/
 .spa-shell-main-nav {
-    width: 250px;
+    width: 400px; /*250->400. 더 넓게*/
     background: #eee;
+    z-index: 1;
 }
 
     /*자식 엘리먼트에 영향을 주는 부모 클래스 사용*/
@@ -57,7 +77,7 @@ html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하�
     }
 
 .spa-shell-main-content {
-    left: 250px;
+    left: 400px; /*250->400. 더 넓게*/
     right: 0;
     background: #ddd;
 }
@@ -73,8 +93,7 @@ html 디버깅 시 셸 모듈에서 어떤 엘리먼트를 생성 및 제어하�
     right: 0;
     height: 40px;
 }
-/*
-spa.chat.css 로 이동
+/* spa.chat.css 로 이동
 .spa-shell-chat {
     bottom: 0;
     right: 0;
@@ -93,8 +112,7 @@ spa.chat.css 로 이동
     background: #a00;
 }
 */
-/*
-채팅 슬라이더를 방해하지 않도록 주석
+/* 채팅 슬라이더를 방해하지 않도록 주석
 .spa-shell-modal {
     margin-top: -200px;
     margin-left: -200px;
