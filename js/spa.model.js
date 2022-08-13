@@ -24,11 +24,13 @@ spa.model = (function () {
         people_cid_map: {}, // 클라이언트 ID를 key 로 하는 '찾은 사람 객체 맵'
         people_db: TAFFY(), // insert 나 join 기능이 있는 DB 컬렉션. 사람 객체의 TaffyDB 컬렉션. 빈 컬렉션으로 초기화
         user: null, // 현재 사용자 객체
+        is_connected: false, // 사용자가 현재 채팅방에 있는지 알려주는 flag
     }
     let isFakeData = true // true: 모델에서 가짜 데이터를 사용한다
     let makePerson, personProto, removePerson
     let people, clearPeopleDB, makeCid, completeLogin
     let initModule
+    let chat
 
 
     /**
@@ -207,7 +209,107 @@ spa.model = (function () {
         }
     })()
 
+    /**
+     * chat 은 채팅 메시지를 관리하는 객체이다.
+     * @example spa.model.chat 에서 사용할 수 있다
+     * @method join() : 채팅방에 참가한다. 사용자가 익명이면 아무 일도 하지 않고 바로 false 반환
+     * @method get_chatee() : 채팅 중인 사용자의 person 객체 반환. 채팅 상대가 없다면 null 반환
+     * @method set_chatee(<person_id>) : 채팅 상대를 person_id 를 통해 고유 식별한 person 객체로 설정한다.
+     * 채팅 상대 정보를 데이터로 제공하는 spa-setchatee 이벤트를 발송해야 한다
+     * 일치하는 person 객체를 온라인 상태인 사람 컬렉션에서 찾을 수 없는 경우 채팅 상대(chatee)는 null 이 된다
+     * 요청한 사람이 이미 채팅 중인 사람이라면 false 를 반환한다
+     * @method send_message(<msg_text>) : 채팅 상대에게 메시지를 보낸다
+     * 이때 메시지 정보를 데이터로 사용해 spa-updatechat 이벤트를 발송해야 한다
+     * 사용자가 익명이거나 채팅 상대가 null이면 이 메서드는 아무 행동도 수행하지 않고 false 를 반환한다
+     * @method update_avatar(<update_avatar_map>) :person 객체에 대한 아바타 정보를 수정한다
+     * 인자(update_avatar_map)에는 person_id와 css_map 속성이 있어야 한다
+     *
+     * @event spa-listchange : 온라인 상태인 사람 목록이 바뀔 때 발송한다
+     * 업데이트된 사람 컬렉션 데이터 제공
+     * @event spa-setchatee : 채팅 상대가 바뀔 때 발송한다
+     * 기존 채팅 상대와 새로운 채팅 상대의 맵 데이터 제공
+     * @event spa-updatechat : 새 메시지를 보내거나 받을 때 발송한다
+     * 메시지 정보 맵 데이터 제공
+     *
+     * @see p.260
+     */
+    chat = (function () {
+        let publish_listChange, update_list, leave_chat, join_chat
 
+        /**
+         * 새 사람들 목록을 전달 받으면 사람들 객체를 갱신
+         * @param arg_list
+         */
+        update_list = function (arg_list) {
+            let i, person_map, make_person_map
+            const people_list= arg_list[0]
+
+            clearPeopleDB()
+            PERSON:
+            for (i= 0; i < people_list.length; i++) {
+                person_map= people_list[i]
+                if (!person_map.name) {
+                    continue PERSON
+                }
+                // 사용자가 정의되어 있으면 css_map 업데이트하고 나머지를 건너뜀
+                if (!make_person_map) {
+                    stateMap.user.css_map = person_map.css_map
+                    continue PERSON
+                }
+                make_person_map = {
+                    cid: person_map.cid,
+                    css_map: person_map.css_map,
+                    id: person_map.id,
+                    name: person_map.name
+                }
+                makePerson(make_person_map)
+            }
+            stateMap.people_db.sort('name')
+        }
+        /**
+         * 백엔드로부터 listchange 메시지를 받을 때마다 사용한다
+         * @param arg_list
+         * @function 업데이트된 사람들 목록 데이터와 함께 spa-listchange 전역 jQuery 이벤트를 발송
+         */
+        publish_listChange = function (arg_list) {
+            update_list(arg_list)
+            $.gevent.publish('spa-listchange', [arg_list])
+        }
+        /**
+         * leavechat 메시지를 백엔드로 보내고 상태 변수를 정리한다
+         */
+        leave_chat = function () {
+            const sio= isFakeData ? spa.fake.mockSio : spa.data.getSio()
+            stateMap.is_connected = false
+            if (sio) {
+                sio.emit('leavechat')
+            }
+        }
+        /**
+         * 채팅방 참여
+         * @function listchange 콜백이 두 번 이상 등록되지 않도록, 사용자가 채팅에 이미 참여했는지 검사한다
+         */
+        join_chat = function () {
+            let sio
+            if(stateMap.is_connected) {
+                return false
+            }
+            if(stateMap.user.get_is_anonymous()){
+                console.warn('User must be defined before joining chat')
+                return false
+            }
+
+            sio = isFakeData ? spa.fake.mockSio : spa.data.getSio()
+            sio.on('listchange', publish_listChange)
+            stateMap.is_connected = true
+            return true
+        }
+
+        return {
+            leave: leave_chat,
+            join: join_chat
+        }
+    })()
 
     initModule = function () {
         let i, people_list, person_map
@@ -219,8 +321,9 @@ spa.model = (function () {
         })
         stateMap.user = stateMap.anonymous_user
 
+        // p.239
         if(isFakeData){
-            people_list= spa.fake.getPeopleList()
+            people_list= spa.fake.getPeopleList() // 이거 괜찮은지? 예나 지금이나 상수 넣는 것은 같다
             for(i=0; i<people_list.length; i++){
                 person_map = people_list[i]
                 makePerson({
@@ -236,6 +339,7 @@ spa.model = (function () {
 
     return {
         initModule: initModule,
-        people: people,
+        chat: chat,
+        people: people
     }
 })()
