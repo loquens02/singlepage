@@ -94,6 +94,26 @@ spa.fake = (function () {
             }
         }
 
+        /**
+         * 백엔드로부터 listchange 메시지를 수신하는 기능을 에뮬레이션한다.
+         * - listchange: 사용자가 로그인하고 채팅방에 참여한 후에만 chat 객체가 등록하는 콜백
+         * @function listchange 콜백 사용을 매초 시도. 처음 성공하고 나면 시도 중단
+         */
+        send_listchange = function () {
+            listchange_idto = setTimeout(function () {
+                if(callback_map.listchange) {
+                    callback_map.listchange([peopleList])
+                    listchange_idto = undefined
+                }
+                else {
+                    send_listchange()
+                }
+            }, 1000)
+        }
+
+        // process start ..
+        send_listchange()
+
         return {
             on: on_sio,
             emit: emit_sio
