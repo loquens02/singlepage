@@ -78,6 +78,8 @@ spa.model = (function () {
         stateMap.user.id = user_map.id
         stateMap.user.css_map = user_map.css_map
         stateMap.people_cid_map[stateMap.user.cid] = stateMap.user
+        // 로그인하면 바로 채팅방에 참여하도록한다
+        chat.join()
         // 채팅 기능을 추가할 때, 여기서 채팅에 참여하게 해야 한다
         $.gevent.publish('spa-login', [stateMap.user])
     }
@@ -190,9 +192,12 @@ spa.model = (function () {
          * @function people 클로저에 logout 메서드 정의
          */
         logout= function () {
+            let is_removed
             const user= stateMap.user
+            // 로그아웃이 완료되면 자동으로 채팅방에서 나가지게끔 한다
+            chat.leave()
             // 채팅 기능을 추가할 때 여기서 채팅방을 떠나야 한다
-            const is_removed= removePerson(user)
+            is_removed= removePerson(user)
 
             stateMap.user= stateMap.anonymous_user
             $.gevent.publish('spa-logout', [user])
@@ -211,30 +216,43 @@ spa.model = (function () {
 
     /**
      * chat 은 채팅 메시지를 관리하는 객체이다.
+     * - chatee [스페인] 수다쟁이. 여기서는 채팅 상대를 의미
      * @example spa.model.chat 에서 사용할 수 있다
      * @method join() : 채팅방에 참가한다. 사용자가 익명이면 아무 일도 하지 않고 바로 false 반환
-     * @method get_chatee() : 채팅 중인 사용자의 person 객체 반환. 채팅 상대가 없다면 null 반환
-     * @method set_chatee(<person_id>) : 채팅 상대를 person_id 를 통해 고유 식별한 person 객체로 설정한다.
-     * 채팅 상대 정보를 데이터로 제공하는 spa-setchatee 이벤트를 발송해야 한다
-     * 일치하는 person 객체를 온라인 상태인 사람 컬렉션에서 찾을 수 없는 경우 채팅 상대(chatee)는 null 이 된다
+     * @method get_chatee() : 채팅 중인 사용자의 Person 객체 반환. 채팅 상대가 없다면 null 반환
+     * @method set_chatee(<person_id>) : 채팅 상대를 person_id 를 통해 고유 식별한 사람(person 객체)으로 설정한다.
+     * person_id 가 사람 목록(온라인 상태인 사람 컬렉션)에 존재하지 않으면 채팅 상대(chatee)는 null 로 설정한다
      * 요청한 사람이 이미 채팅 중인 사람이라면 false 를 반환한다
+     * 채팅 상대 정보를 데이터로 제공하는 spa-setchatee 전역 커스텀 이벤트를 발송한다
      * @method send_message(<msg_text>) : 채팅 상대에게 메시지를 보낸다
-     * 이때 메시지 정보를 데이터로 사용해 spa-updatechat 이벤트를 발송해야 한다
-     * 사용자가 익명이거나 채팅 상대가 null이면 이 메서드는 아무 행동도 수행하지 않고 false 를 반환한다
+     * 이때 메시지 정보를 데이터로 사용해 spa-updatechat 전역 커스텀 이벤트를 발송한다
+     * 사용자가 익명이거나 채팅 상대가 null 이면 이 메서드는 작업을 중단하고 false 를 반환한다
      * @method update_avatar(<update_avatar_map>) :person 객체에 대한 아바타 정보를 수정한다
      * 인자(update_avatar_map)에는 person_id와 css_map 속성이 있어야 한다
      *
      * @event spa-listchange : 온라인 상태인 사람 목록이 바뀔 때 발송한다
      * 업데이트된 사람 컬렉션 데이터 제공
-     * @event spa-setchatee : 채팅 상대가 바뀔 때 발송한다
+     * @event spa-setchatee : 채팅 상대가 바뀔 때 발송한다. 새 채팅 상대 설정
      * 기존 채팅 상대와 새로운 채팅 상대의 맵 데이터 제공
+     * {
+     *     old_chatee: <old_chatee_person_object>,
+     *     new_chatee: <new_chatee_person_object>
+     * }
      * @event spa-updatechat : 새 메시지를 보내거나 받을 때 발송한다
      * 메시지 정보 맵 데이터 제공
+     * {
+     *     dest_id: <chatee_id>,
+     *     dest_name: <chatee_name>,
+     *     sender_id: <sender_id>,
+     *     msg_text: <message_content>
+     * }
      *
      * @see p.260
      */
     chat = (function () {
-        let publish_listChange, update_list, leave_chat, join_chat
+        let publish_listChange, publish_updatechat, update_list, leave_chat, join_chat
+        let get_chatee, set_chatee, send_message
+        let chatee = null
 
         /**
          * 새 사람들 목록을 전달 받으면 사람들 객체를 갱신
@@ -243,6 +261,7 @@ spa.model = (function () {
         update_list = function (arg_list) {
             let i, person_map, make_person_map
             const people_list= arg_list[0]
+            let is_chatee_online = false
 
             clearPeopleDB()
             PERSON:
@@ -262,9 +281,18 @@ spa.model = (function () {
                     id: person_map.id,
                     name: person_map.name
                 }
+
+                // Person 객체(채팅 상대)가 null 이 아니고, 채팅 상대를 업데이트된 사용자 목록에서 찾은 경우 is_chatee_online 설정
+                if(chatee && chatee.id === make_person_map.id) {
+                    is_chatee_online = true
+                }
                 makePerson(make_person_map)
             }
             stateMap.people_db.sort('name')
+            // Person 객체가 null 이 아니고, 채팅 상대가 오프라인 상태이면 채팅 상대 설정을 해제한다 > 'spa-setchatee' 전역 이벤트 발생
+            if(chatee && !is_chatee_online) {
+                set_chatee('')
+            }
         }
         /**
          * 백엔드로부터 listchange 메시지를 받을 때마다 사용한다
@@ -276,18 +304,45 @@ spa.model = (function () {
             $.gevent.publish('spa-listchange', [arg_list])
         }
         /**
-         * leavechat 메시지를 백엔드로 보내고 상태 변수를 정리한다
+         * 
+         * @function 메시지 상세 정보 데이터를 담아 spa-updatechat 이벤트 발송
+         * @see p.270
+         */
+        publish_updatechat = function (arg_list) {
+            const msg_map = arg_list[0]
+            if(!chatee){
+                set_chatee(msg_map.sender_id)
+            }
+            else if(msg_map.sender_id !== stateMap.user.id && msg_map.sender_id !== chatee.id) {
+                set_chatee(msg_map.sender_id)
+            }
+            $.gevent.publish('spa-updatechat', [msg_map])
+        }
+
+        /**
+         * 채팅방 떠나기
+         * @function leavechat 메시지를 백엔드로 보내고 상태 변수를 정리한다
          */
         leave_chat = function () {
             const sio= isFakeData ? spa.fake.mockSio : spa.data.getSio()
+            chatee= null
             stateMap.is_connected = false
             if (sio) {
                 sio.emit('leavechat')
             }
         }
         /**
+         * 채팅 상대 Person 객체 반환
+         * @return {null}
+         */
+        get_chatee = function () {
+            return chatee
+        }
+        /**
          * 채팅방 참여
          * @function listchange 콜백이 두 번 이상 등록되지 않도록, 사용자가 채팅에 이미 참여했는지 검사한다
+         * @event listchange
+         * @event updatechat
          */
         join_chat = function () {
             let sio
@@ -301,13 +356,66 @@ spa.model = (function () {
 
             sio = isFakeData ? spa.fake.mockSio : spa.data.getSio()
             sio.on('listchange', publish_listChange)
+            // 백엔드로부터 수신한 updatechat 메시지를 처리하기 위해 'publish_updatechat' 바인딩
+            // 이 메시지를 받을 때마다 spa-updatechat 이벤트가 발송된다(발생시킨다)
+            sio.on('updatechat', publish_updatechat)
             stateMap.is_connected = true
+            return true
+        }
+        /**
+         * 텍스트 메시지 및 관련 상세 정보 전송
+         */
+        send_message = function (message_text) {
+            let message_map
+            const sio= isFakeData ? spa.fake.mockSio : spa.data.getSio()
+            // 커넥션이 없는 경우 메시지 전송 중단.
+            if(!sio) {
+                return false
+            }
+            // 사용자나 채팅 상대가 설정되어 있지 않은 경우에도 메시지 전송 중단
+            if(!(stateMap.user && chatee)) {
+                return false
+            }
+
+            message_map = {
+                dest_id: chatee.id,
+                dest_name: chatee.name,
+                sender_id: stateMap.user.id,
+                message_text: message_text
+            }
+
+            // 채팅창에서 사용자가 (진행 중인) 메시지를 볼 수 있게 updatechat 발행 > spa-updatechat 이벤트 발송
+            publish_updatechat([message_map])
+            sio.emit('updatechat', message_map)
+            return true
+        }
+        /**
+         * 채팅 상대 객체를 인자로 받은 Person 객체로 변경
+         * @param person_id
+         * @return {boolean} 인자로 받은 Person 객체(채팅 상대)가 현재 채팅 상대와 같다면 false 반환
+         */
+        set_chatee = function (person_id) {
+            let new_chatee= stateMap.people_cid_map[person_id]
+            if(new_chatee){
+               if(chatee && chatee.id === new_chatee.id){
+                   return false
+               }
+            }
+            else {
+                new_chatee= null
+            }
+            // 기존 채팅 상대 및 새 채팅 상대 맵을 데이터로 담아 spa-setchatee 이벤트 발송
+            $.gevent.publish('spa-setchatee', {old_chatee:chatee, new_chatee:new_chatee})
+            chatee = new_chatee
             return true
         }
 
         return {
             leave: leave_chat,
-            join: join_chat
+            get_chatee: get_chatee,
+            join: join_chat,
+            send_message: send_message,
+            set_chatee: set_chatee
         }
     })()
 
