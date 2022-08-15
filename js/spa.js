@@ -18,7 +18,8 @@ const spa = (function () {
         spa.shell.initModule($container) // 순서2
 
         // spa.model.test.logInOutTest() // release 전에 꼭 주석하기
-        spa.model.chat.join.test.joinTest() // TODO release 전에 꼭 주석하기
+        // spa.model.chat.join.test.joinTest() // release 전에 꼭 주석하기
+        spa.model.messageTest.messageReqRes() // release 전에 꼭 주석하기
     }
     return { initModule: initModule}
 })()
