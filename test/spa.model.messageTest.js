@@ -26,10 +26,12 @@ spa.model.messageTest = (function () {
         // (왜? login() > userupdate event: completeLogin() > chat.join() === join_chat() > listchange evnet: publish_listChange() > spa-listchange)
         spa.model.people.login('Fanny')
 
-        console.log('spa.model.chat.send_message(\'Hi Pebbles!\'): ' + spa.model.chat.send_message('Hi Pebbles!'))
-
         // ---------- 8초 대기 후 메시지 수신
         // 테스트를 위한 지연 필요. 메시지 수신 전에 다음 명령어 넣으면 반응이 없다.
+        setTimeout(function () {
+            console.log('spa.model.chat.send_message(\'Hi Pebbles!\'): ' + spa.model.chat.send_message('Hi Pebbles!'))
+        }, 8000)
+
         // js sleep https://www.daleseo.com/js-sleep/
         // - JS 는 싱글 스레드 방식이니 동기식 지연은 안 되고
         // - sleep(8000).then(() => 콘솔로그).then(주렁주렁) 다는 것도 싫고
@@ -38,18 +40,18 @@ spa.model.messageTest = (function () {
         // 메시지를 수신하면 채팅 상대가 설정된다.
         setTimeout(function () {
             console.log('spa.model.chat.send_message(\'What is up, tricks?\'): ' + spa.model.chat.send_message('What is up, tricks?'))
-        }, 14000)
+        }, 8000)
         // spa.model.chat.send_message('What is up, tricks?')
 
         // 채팅 상대를 Pebble 로 설정
         setTimeout(function () {
             console.log('spa.model.chat.set_chatee(\'id_03\')'+spa.model.chat.set_chatee('id_03'))
-        }, 14000)
+        }, 8000)
         // spa.model.chat.set_chatee('id_03')
 
         setTimeout(function () {
             console.log('spa.model.chat.send_message(\'Hi Pebbles!\')'+spa.model.chat.send_message('Hi Pebbles!'))
-        }, 14000)
+        }, 8000)
         // spa.model.chat.send_message('Hi Pebbles!')
     }
 

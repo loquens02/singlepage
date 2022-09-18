@@ -71,7 +71,7 @@ spa.model = (function () {
      * @param user_list
      */
     completeLogin = function (user_list) {
-        const user_map = user_list[0]
+        const user_map = user_list[0] // [person_map] 으로 넣어서
         delete stateMap.people_cid_map[user_map.cid]
 
         stateMap.user.cid = user_map.cid
@@ -164,7 +164,7 @@ spa.model = (function () {
          * @function people 클로저에 logout 메서드 정의
          */
         login= function (name) {
-            const sio= isFakeData? spa.fake.mockSio : spa.data.getSio()
+            const sio= isFakeData? spa.fake.mockSio : spa.data.getSio() // 22.8.28 spa.data 는 아직 비어있다.
 
             stateMap.user= makePerson({
                 cid: makeCid(),
@@ -358,7 +358,7 @@ spa.model = (function () {
             sio.on('listchange', publish_listChange)
             // 백엔드로부터 수신한 updatechat 메시지를 처리하기 위해 'publish_updatechat' 바인딩
             // 이 메시지를 받을 때마다 spa-updatechat 이벤트가 발송된다(발생시킨다)
-            sio.on('updatechat', publish_updatechat)
+            sio.on('updatechat', publish_updatechat) // 인자는 뭘로??
             stateMap.is_connected = true
             return true
         }

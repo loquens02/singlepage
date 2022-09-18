@@ -17,7 +17,7 @@ spa.fake = (function () {
     let peopleList, makeFakeId, mockSio, getPeopleList
     let fakeIdSerial = 5
     makeFakeId = function () {
-        return 'id_' + String(fakeIdSerial++)
+        return 'id_' + String(fakeIdSerial++) // 계속 5만 나온다.
     }
 
 
@@ -84,13 +84,13 @@ spa.fake = (function () {
                 // 사용자가 로그인할 때 발생하는 adduser 메시지 응답 내용
                 setTimeout(function () {
                     person_map = {
-                        id: makeFakeId(),
+                        id: makeFakeId(), // 이게 message_map 에서 sender_id 로 들어간다
                         name: data.name,
                         css_map: data.css_map
                     }
                     peopleList.push(person_map)
                     callback_map.userupdate([person_map])
-                }, 3000)
+                }, 1000) // 디버깅 편의를 위해 3초 -> 1초로 줄임
             }
 
             // 2초 대기 후 'updatechat' 이벤트에 'updatechat' 콜백으로 (mock)응답. 사용자 정보를 그대로 출력
